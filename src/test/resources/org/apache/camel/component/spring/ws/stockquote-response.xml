@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<string xmlns="http://www.webserviceX.NET/">
+	<StockQuotes>
+		<Stock>
+			<Symbol>JAVA</Symbol>
+			<Last>0.00</Last>
+			<Date>N/A</Date>
+			<Time>N/A</Time>
+			<Change>N/A</Change>
+			<Open>N/A</Open>
+			<High>N/A</High>
+			<Low>N/A</Low>
+			<Volume>N/A</Volume>
+			<MktCap>N/A</MktCap>
+			<PreviousClose>N/A</PreviousClose>
+			<PercentageChange>N/A</PercentageChange>
+			<AnnRange>N/A - N/A</AnnRange>
+			<Earns>N/A</Earns>
+			<P-E>N/A</P-E>
+			<Name>JAVA</Name>
+		</Stock>
+	</StockQuotes>
+</string>

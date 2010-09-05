@@ -19,6 +19,8 @@ package org.apache.camel.component.spring.ws;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.camel.component.spring.ws.bean.CamelEndpointMapping;
+import org.apache.camel.component.spring.ws.type.EndpointMappingType;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
 public class SpringWebserviceConfiguration {
@@ -27,6 +29,11 @@ public class SpringWebserviceConfiguration {
 	private WebServiceTemplate webServiceTemplate;
 	private String soapAction;
 	private URI wsAddressingAction;
+	
+	/* Consumer configuration */
+	private CamelEndpointMapping endpointMapping;
+	private Object endpointMappingLookupKey;
+	private EndpointMappingType endpointMappingType;
 
 	public WebServiceTemplate getWebServiceTemplate() {
 		return webServiceTemplate;
@@ -45,7 +52,13 @@ public class SpringWebserviceConfiguration {
 	}
 	
 	public String getEndpointUri() {
-		return webServiceTemplate.getDefaultUri();
+		if (endpointMappingLookupKey != null) {
+			// only for consumers, use lookup key as endpoint uri/key
+			return endpointMappingLookupKey.toString();
+		} else if (webServiceTemplate != null) {
+			return webServiceTemplate.getDefaultUri();
+		}
+		return null;
 	}
 
 	public URI getWsAddressingAction() {
@@ -58,5 +71,29 @@ public class SpringWebserviceConfiguration {
 
 	public void setWsAddressingAction(String wsAddressingAction) throws URISyntaxException {
 		this.wsAddressingAction = new URI(wsAddressingAction);
+	}
+
+	public CamelEndpointMapping getEndpointMapping() {
+		return endpointMapping;
+	}
+
+	public void setEndpointMapping(CamelEndpointMapping endpointMapping) {
+		this.endpointMapping = endpointMapping;
+	}
+
+	public Object getEndpointMappingLookupKey() {
+		return endpointMappingLookupKey;
+	}
+
+	public void setEndpointMappingLookupKey(Object endpointMappingLookupKey) {
+		this.endpointMappingLookupKey = endpointMappingLookupKey;
+	}
+
+	public EndpointMappingType getEndpointMappingType() {
+		return endpointMappingType;
+	}
+
+	public void setEndpointMappingType(EndpointMappingType endpointMappingType) {
+		this.endpointMappingType = endpointMappingType;
 	}
 }

@@ -17,15 +17,21 @@
 package org.apache.camel.component.spring.ws;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
+import org.apache.camel.RuntimeCamelException;
+import org.apache.camel.component.spring.ws.bean.CamelEndpointMapping;
+import org.apache.camel.component.spring.ws.type.EndpointMappingType;
 import org.apache.camel.impl.DefaultComponent;
 import org.apache.camel.util.EndpointHelper;
 import org.springframework.ws.WebServiceMessageFactory;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.transport.WebServiceMessageSender;
+import org.springframework.xml.xpath.XPathExpression;
+import org.springframework.xml.xpath.XPathExpressionFactory;
 
 /**
  * Apache Camel component for working with Spring Webservices (a.k.a Spring-WS).
@@ -33,6 +39,8 @@ import org.springframework.ws.transport.WebServiceMessageSender;
  * @author Richard Kettelerij
  */
 public class SpringWebserviceComponent extends DefaultComponent {
+	
+	private SpringWebserviceConfiguration configuration;
 
 	public SpringWebserviceComponent() {
 		super();
@@ -44,6 +52,42 @@ public class SpringWebserviceComponent extends DefaultComponent {
 
 	@Override
 	protected Endpoint createEndpoint(String uri, String remaining, Map<String, Object> parameters) throws Exception {
+		SpringWebserviceConfiguration configuration;
+		if (parameters.containsKey("endpointMapping")) {
+			configuration = createConsumerConfiguration(uri, remaining, parameters);
+		} else {
+			configuration = createProducerConfiguration(uri, remaining, parameters);
+		}
+        EndpointHelper.setProperties(getCamelContext(), configuration, parameters);
+        return new SpringWebserviceEndpoint(this, configuration);
+	}
+
+	private SpringWebserviceConfiguration createConsumerConfiguration(String uri, String remaining, Map<String, Object> parameters) {
+		CamelEndpointMapping endpointMapping = resolveAndRemoveReferenceParameter(parameters, "endpointMapping", CamelEndpointMapping.class, null);
+		if (endpointMapping == null) {
+			throw new RuntimeCamelException("No CamelEndpointMapping bean found in Spring ApplicationContext, this bean is required for Spring-WS consumer support");
+		}		
+		configuration = new SpringWebserviceConfiguration();
+        configuration.setEndpointMapping(endpointMapping);
+        
+		EndpointMappingType type = EndpointMappingType.getTypeFromUriPrefix(remaining);
+        if (type != null) {
+            String lookupKey = remaining.substring(type.getPrefix().length());
+            if (lookupKey.startsWith("//")) {
+            	lookupKey = lookupKey.substring(2);
+            }
+            configuration.setEndpointMappingLookupKey(lookupKey);
+            if (EndpointMappingType.XPATH.equals(type)) {
+            	XPathExpression expression = XPathExpressionFactory.createXPathExpression(lookupKey);
+            	configuration.setEndpointMappingLookupKey(expression);
+            }
+            configuration.setEndpointMappingType(type);
+        }
+        return configuration;
+	}
+
+
+	private SpringWebserviceConfiguration createProducerConfiguration(String uri, String remaining, Map<String, Object> parameters) throws URISyntaxException {
 		URI webServiceEndpointUri = new URI(remaining);
 		
         // Get a WebServiceTemplate from the registry if specified by an option on the component, else create a new template with Spring-WS defaults
@@ -60,9 +104,8 @@ public class SpringWebserviceComponent extends DefaultComponent {
         if (messageFactory != null) {
         	webServiceTemplate.setMessageFactory(messageFactory);
         }
-        SpringWebserviceConfiguration configuration = new SpringWebserviceConfiguration();
+        configuration = new SpringWebserviceConfiguration();
         configuration.setWebServiceTemplate(webServiceTemplate);
-        EndpointHelper.setProperties(getCamelContext(), configuration, parameters);
-        return new SpringWebserviceEndpoint(this, configuration);
+        return configuration;
 	}
 }
