@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+	<bean id="messageFactory" class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory" />
+
+	<bean id="webServiceTemplate" class="org.springframework.ws.client.core.WebServiceTemplate">
+		<constructor-arg ref="messageFactory" />
+	</bean>
+
+	<camelContext xmlns="http://camel.apache.org/schema/spring">
+		<route>
+			<from uri="direct:stockQuoteWebservice" />
+			<to uri="springws:http://www.webservicex.net/stockquote.asmx?webServiceTemplate=#webServiceTemplate&amp;soapAction=http://www.webserviceX.NET/GetQuote" />
+		</route>
+		<route>
+			<from uri="direct:stockQuoteWebserviceAsString" />
+			<to uri="springws:http://www.webservicex.net/stockquote.asmx?webServiceTemplate=#webServiceTemplate&amp;soapAction=http://www.webserviceX.NET/GetQuote" />
+			<convertBodyTo type="java.lang.String" />
+		</route>
+		<route>
+			<from uri="direct:stockQuoteWebserviceWithDefaultTemplate" />
+			<to uri="springws:http://www.webservicex.net/stockquote.asmx?soapAction=http://www.webserviceX.NET/GetQuote" />
+		</route>
+		<route>
+			<from uri="direct:stockQuoteWebserviceWithNonDefaultMessageFactory" />
+			<to uri="springws:http://www.webservicex.net/stockquote.asmx?messageFactory=#messageFactory&amp;soapAction=http://www.webserviceX.NET/GetQuote" />
+		</route>
+		<route>
+			<from uri="direct:stockQuoteWebserviceWithoutDefaultUri" />
+			<to uri="springws:http://dummy?webServiceTemplate=#webServiceTemplate&amp;soapAction=http://www.webserviceX.NET/GetQuote" />
+			<convertBodyTo type="java.lang.String" />
+		</route>
+		<route>
+			<from uri="direct:stockQuoteWebserviceWithWsAddressing" />
+			<to uri="springws:http://www.webservicex.net/stockquote.asmx?soapAction=http://www.webserviceX.NET/GetQuote&amp;wsAddressingAction=http://www.webserviceX.NET" />
+		</route>
+	</camelContext>
+	
+</beans>
