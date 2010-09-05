@@ -32,8 +32,6 @@ public class SpringWebserviceEndpoint extends DefaultEndpoint {
 	}
 
 	public Consumer createConsumer(Processor processor) throws Exception {
-//		throw new RuntimeCamelException("The Spring-WS component cannot be used as a consumer (e.g. <from uri=\"springws:bla\">). " +
-//				"Instead use CamelTargetAdapter to direct webservice messages received by Spring-WS to a Camel endpoint of your choice.");
 		return new SpringWebserviceConsumer(this, processor);
 	}
 
