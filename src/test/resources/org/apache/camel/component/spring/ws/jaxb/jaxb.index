@@ -14,14 +14,4 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 ## ------------------------------------------------------------------------
-
-# Set root logger level to DEBUG and its only appender to A1.
-log4j.rootLogger=DEBUG, A1
-
-log4j.logger.org.springframework=WARN
-log4j.logger.org.apache.camel=DEBUG
-log4j.logger.com.sun.xml.bind=DEBUG
- 
-log4j.appender.A1=org.apache.log4j.ConsoleAppender
-log4j.appender.A1.layout=org.apache.log4j.PatternLayout
-log4j.appender.A1.layout.ConversionPattern=%d %-5p %c - %m%n
+QuoteRequest

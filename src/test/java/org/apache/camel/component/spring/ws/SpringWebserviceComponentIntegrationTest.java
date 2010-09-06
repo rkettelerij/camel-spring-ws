@@ -33,8 +33,8 @@ public class SpringWebserviceComponentIntegrationTest extends AbstractJUnit4Spri
 
 	private static final String stockQuoteWebserviceUri = "http://www.webservicex.net/stockquote.asmx";
 
-	private static final String xmlRequestForGoogleStockQuote 
-		= "<GetQuote xmlns=\"http://www.webserviceX.NET/\"><symbol>GOOG</symbol></GetQuote>";
+	private static final String xmlRequestForGoogleStockQuote =
+		"<GetQuote xmlns=\"http://www.webserviceX.NET/\"><symbol>GOOG</symbol></GetQuote>";
 	
     @Produce
     protected ProducerTemplate template;
