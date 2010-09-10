@@ -9,24 +9,20 @@
 	<!-- ============================== -->
 	<camelContext xmlns="http://camel.apache.org/schema/spring">
 		<route>
-			<from uri="springws:rootqname:{http://www.webserviceX.NET/}SomeElement?endpointMapping=#endpointMapping" />
-			<to uri="mock:testRootQNameDummy" />
-		</route>
-		<route>
 			<from uri="springws:rootqname:{http://www.webserviceX.NET/}GetQuote?endpointMapping=#endpointMapping" />
-			<to uri="mock:testRootQName" />
+			<to uri="responseProcessor" />
 		</route>
 		<route>
 			<from uri="springws:soapaction:http://www.webserviceX.NET/GetQuote?endpointMapping=#endpointMapping" />
-			<to uri="mock:testSoapAction" />
+			<to uri="responseProcessor" />
 		</route>
 		<route>
 			<from uri="springws:uri:/stockquote2?endpointMapping=#endpointMapping" />
-			<to uri="mock:testUri" />
+			<to uri="responseProcessor" />
 		</route>
 		<route>
 			<from uri="springws:xpathresult:GRABME?expression=//GetQuote&amp;endpointMapping=#endpointMapping" />
-			<to uri="mock:testXPath" />
+			<to uri="responseProcessor" />
 		</route>
 	</camelContext>
 	

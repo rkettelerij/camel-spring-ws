@@ -62,7 +62,7 @@ public class SpringWebserviceProducer extends DefaultProducer {
 		exchange.getOut().setBody(body);
 	}
 
-	private final class DefaultWebserviceMessageCallback implements WebServiceMessageCallback {
+	protected class DefaultWebserviceMessageCallback implements WebServiceMessageCallback {
 		private String soapActionHeader;
 		private URI wsAddressingActionHeader;
 		

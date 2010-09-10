@@ -20,7 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.camel.component.spring.ws.bean.CamelEndpointMapping;
-import org.apache.camel.component.spring.ws.type.EndpointMappingType;
+import org.apache.camel.component.spring.ws.type.EndpointMappingKey;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
 public class SpringWebserviceConfiguration {
@@ -32,8 +32,7 @@ public class SpringWebserviceConfiguration {
 	
 	/* Consumer configuration */
 	private CamelEndpointMapping endpointMapping;
-	private Object endpointMappingLookupKey;
-	private EndpointMappingType endpointMappingType;
+	private EndpointMappingKey endpointMappingKey;
 
 	public WebServiceTemplate getWebServiceTemplate() {
 		return webServiceTemplate;
@@ -52,9 +51,9 @@ public class SpringWebserviceConfiguration {
 	}
 	
 	public String getEndpointUri() {
-		if (endpointMappingLookupKey != null) {
+		if (endpointMappingKey != null) {
 			// only for consumers, use lookup key as endpoint uri/key
-			return endpointMappingLookupKey.toString();
+			return endpointMappingKey.getLookupKey();
 		} else if (webServiceTemplate != null) {
 			return webServiceTemplate.getDefaultUri();
 		}
@@ -81,19 +80,13 @@ public class SpringWebserviceConfiguration {
 		this.endpointMapping = endpointMapping;
 	}
 
-	public Object getEndpointMappingLookupKey() {
-		return endpointMappingLookupKey;
+	public EndpointMappingKey getEndpointMappingKey() {
+		return endpointMappingKey;
 	}
 
-	public void setEndpointMappingLookupKey(Object endpointMappingLookupKey) {
-		this.endpointMappingLookupKey = endpointMappingLookupKey;
+	public void setEndpointMappingKey(EndpointMappingKey endpointMappingKey) {
+		this.endpointMappingKey = endpointMappingKey;
 	}
 
-	public EndpointMappingType getEndpointMappingType() {
-		return endpointMappingType;
-	}
-
-	public void setEndpointMappingType(EndpointMappingType endpointMappingType) {
-		this.endpointMappingType = endpointMappingType;
-	}
+	
 }

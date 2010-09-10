@@ -24,6 +24,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.component.spring.ws.bean.CamelEndpointMapping;
+import org.apache.camel.component.spring.ws.type.EndpointMappingKey;
 import org.apache.camel.component.spring.ws.type.EndpointMappingType;
 import org.apache.camel.impl.DefaultComponent;
 import org.apache.camel.util.EndpointHelper;
@@ -76,12 +77,13 @@ public class SpringWebserviceComponent extends DefaultComponent {
             if (lookupKey.startsWith("//")) {
             	lookupKey = lookupKey.substring(2);
             }
-            configuration.setEndpointMappingLookupKey(lookupKey);
-            if (EndpointMappingType.XPATH.equals(type)) {
-            	XPathExpression expression = XPathExpressionFactory.createXPathExpression(lookupKey);
-            	configuration.setEndpointMappingLookupKey(expression);
+            String xpathExpression = getAndRemoveParameter(parameters, "expression", String.class);
+            if (xpathExpression != null && EndpointMappingType.XPATHRESULT.equals(type)) {
+            	XPathExpression expression = XPathExpressionFactory.createXPathExpression(xpathExpression);
+            	configuration.setEndpointMappingKey(new EndpointMappingKey(type, lookupKey, expression));
+            } else {
+                configuration.setEndpointMappingKey(new EndpointMappingKey(type, lookupKey, null));
             }
-            configuration.setEndpointMappingType(type);
         }
         return configuration;
 	}

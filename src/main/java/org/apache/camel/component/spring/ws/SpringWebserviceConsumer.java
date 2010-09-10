@@ -28,6 +28,7 @@ import javax.xml.transform.TransformerException;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
+import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.impl.DefaultConsumer;
 import org.apache.camel.impl.DefaultExchange;
@@ -96,11 +97,12 @@ public class SpringWebserviceConsumer extends DefaultConsumer implements Message
 		
 		// create webservice response from output body
 		if (exchange.getPattern().isOutCapable()) {
-			Source responseSource = exchange.getOut(Source.class);
-			if (responseSource != null) {
+			Message responseMessage = exchange.getOut(Message.class);
+			if (responseMessage != null) {
+				Source responseBody = responseMessage.getBody(Source.class);
 				WebServiceMessage response = messageContext.getResponse();
 				TransformerSupportDelegate transformerSupportDelegate = new TransformerSupportDelegate();
-				transformerSupportDelegate.transformSourceToResult(responseSource, response.getPayloadResult());
+				transformerSupportDelegate.transformSourceToResult(responseBody, response.getPayloadResult());
 			}
 		}
 	}
@@ -116,13 +118,13 @@ public class SpringWebserviceConsumer extends DefaultConsumer implements Message
 
 	@Override
 	protected void doStop() throws Exception {
-		configuration.getEndpointMapping().removeConsumer(endpoint.getEndpointKey());
+		configuration.getEndpointMapping().removeConsumer(configuration.getEndpointMappingKey());
 		super.doStop();
 	}
 
 	@Override
 	protected void doStart() throws Exception {
-		configuration.getEndpointMapping().addConsumer(endpoint.getEndpointKey(), configuration.getEndpointMappingType(), this);
+		configuration.getEndpointMapping().addConsumer(configuration.getEndpointMappingKey(), this);
 		super.doStart();
 	}
 

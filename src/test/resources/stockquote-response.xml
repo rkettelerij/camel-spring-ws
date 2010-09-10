@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<string xmlns="http://www.webserviceX.NET/">
+<?xml version="1.0" encoding="UTF-8"?><string>
 	<StockQuotes>
 		<Stock>
 			<Symbol>JAVA</Symbol>

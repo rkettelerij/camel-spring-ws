@@ -28,8 +28,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 
 import org.apache.camel.RuntimeCamelException;
+import org.apache.camel.component.spring.ws.type.EndpointMappingKey;
 import org.apache.camel.component.spring.ws.type.EndpointMappingType;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.ws.context.MessageContext;
 import org.springframework.ws.server.EndpointInterceptor;
@@ -52,31 +52,31 @@ import org.w3c.dom.Element;
  */
 public class CamelEndpointMapping extends AbstractEndpointMapping {
 	
-	private Map<Object, EndpointHolder> consumers = new ConcurrentHashMap<Object, EndpointHolder>();
+	private Map<EndpointMappingKey, MessageEndpoint> endpoints = new ConcurrentHashMap<EndpointMappingKey, MessageEndpoint>();
     private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
 	@Override
 	protected Object getEndpointInternal(MessageContext messageContext) throws Exception {
-		for (Map.Entry<Object, EndpointHolder> entry : consumers.entrySet()) {
+		for (EndpointMappingKey key : endpoints.keySet()) {
 			Object messageKey = null;
-			switch (entry.getValue().getType()) {
+			switch (key.getType()) {
 				case ROOT_QNAME : 
 					messageKey = getRootQName(messageContext); 
 					break;
 				case SOAP_ACTION : 
 					messageKey = getSoapAction(messageContext); 
 					break;
-				case XPATH :
-					messageKey = getXPathExpression(messageContext, entry.getKey());
+				case XPATHRESULT :
+					messageKey = getXPathResult(messageContext, key.getExpression());
 					break;
 				case URI : 
 					messageKey = getUri(); 
 					break;
 				default : 
-					throw new RuntimeCamelException("Invalid endpoint mapping type specified");
+					throw new RuntimeCamelException("Invalid mapping type specified. Supported types are: root QName, SOAP action, XPath expression and URI");
 			}
-			if (messageKey != null && messageKey.equals(entry.getKey())) {
-				return entry.getValue().getEndpoint();
+			if (messageKey != null && key.getLookupKey().equals(messageKey)) {
+				return endpoints.get(key);
 			}
 		}        
 		return null;
@@ -84,12 +84,12 @@ public class CamelEndpointMapping extends AbstractEndpointMapping {
 	
     @Override
     protected final EndpointInvocationChain createEndpointInvocationChain(MessageContext messageContext, Object endpoint, EndpointInterceptor[] interceptors) {
-    	for (Map.Entry<Object, EndpointHolder> entry : consumers.entrySet()) {
-    		if (EndpointMappingType.SOAP_ACTION.equals(entry.getValue().getType())) {
+    	for (EndpointMappingKey key : endpoints.keySet()) {
+    		if (EndpointMappingType.SOAP_ACTION.equals(key.getType())) {
     			Object messageKey = getSoapAction(messageContext);
-    			if (messageKey != null && messageKey.equals(entry.getKey())) {
+    			if (messageKey != null && key.getLookupKey().equals(messageKey)) {
     				return new SoapEndpointInvocationChain(endpoint, interceptors);
-    				// TODO add support for SOAP actors/roles and ultimate receiver
+    				// TODO in future, add support for SOAP actors/roles and ultimate receiver
     			}
     		}
 		}
@@ -124,9 +124,8 @@ public class CamelEndpointMapping extends AbstractEndpointMapping {
 		return qName != null ? qName.toString() : null;
 	}
 
-	private String getXPathExpression(MessageContext messageContext, Object lookupKey) throws TransformerException, XMLStreamException {
-		if (false) { //FIXME
-			XPathExpression expression = (XPathExpression) lookupKey;
+	private String getXPathResult(MessageContext messageContext, XPathExpression expression) throws TransformerException, XMLStreamException {
+		if (expression != null) {
 	        Transformer transformer = transformerFactory.newTransformer();
 	        DOMResult domResult = new DOMResult();
 	        transformer.transform(messageContext.getRequest().getPayloadSource(), domResult);
@@ -136,32 +135,11 @@ public class CamelEndpointMapping extends AbstractEndpointMapping {
 		return null;
 	}
 	
-	public void addConsumer(Object key, EndpointMappingType type, MessageEndpoint endpoint) {
-		consumers.put(key, new EndpointHolder(type, endpoint));
+	public void addConsumer(EndpointMappingKey key, MessageEndpoint endpoint) {
+		endpoints.put(key, endpoint);
 	}
 	
 	public void removeConsumer(Object key) {
-		consumers.remove(key);
-	}
-	
-	protected class EndpointHolder {
-		private EndpointMappingType type;
-		private MessageEndpoint endpoint;
-		
-		public EndpointHolder(EndpointMappingType type, MessageEndpoint endpoint) {
-			super();
-			Assert.notNull(type);
-			Assert.notNull(endpoint);
-			this.type = type;
-			this.endpoint = endpoint;
-		}
-
-		public EndpointMappingType getType() {
-			return type;
-		}
-
-		public MessageEndpoint getEndpoint() {
-			return endpoint;
-		}
+		endpoints.remove(key);
 	}
 }
