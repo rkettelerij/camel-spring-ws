@@ -23,11 +23,14 @@ import java.util.Map;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
 import org.apache.camel.RuntimeCamelException;
+import org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher;
 import org.apache.camel.component.spring.ws.bean.CamelEndpointMapping;
 import org.apache.camel.component.spring.ws.type.EndpointMappingKey;
 import org.apache.camel.component.spring.ws.type.EndpointMappingType;
 import org.apache.camel.impl.DefaultComponent;
-import org.apache.camel.util.EndpointHelper;
+import org.apache.camel.util.UnsafeUriCharactersEncoder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.ws.WebServiceMessageFactory;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.transport.WebServiceMessageSender;
@@ -35,14 +38,13 @@ import org.springframework.xml.xpath.XPathExpression;
 import org.springframework.xml.xpath.XPathExpressionFactory;
 
 /**
- * Apache Camel component for working with Spring Webservices (a.k.a Spring-WS).
+ * Apache Camel component for working with Spring Web Services (a.k.a Spring-WS).
  * 
  * @author Richard Kettelerij
  */
 public class SpringWebserviceComponent extends DefaultComponent {
-	
-	private SpringWebserviceConfiguration configuration;
-
+    private static final Log LOG = LogFactory.getLog(SpringWebserviceComponent.class);
+    
 	public SpringWebserviceComponent() {
 		super();
 	}
@@ -53,61 +55,75 @@ public class SpringWebserviceComponent extends DefaultComponent {
 
 	@Override
 	protected Endpoint createEndpoint(String uri, String remaining, Map<String, Object> parameters) throws Exception {
-		SpringWebserviceConfiguration configuration;
-		if (parameters.containsKey("endpointMapping")) {
-			configuration = createConsumerConfiguration(uri, remaining, parameters);
-		} else {
-			configuration = createProducerConfiguration(uri, remaining, parameters);
-		}
-        EndpointHelper.setProperties(getCamelContext(), configuration, parameters);
+	    SpringWebserviceConfiguration configuration = new SpringWebserviceConfiguration();
+		createConsumerConfiguration(remaining, parameters, configuration);
+		createProducerConfiguration(remaining, parameters, configuration);
+        setProperties(configuration, parameters);
         return new SpringWebserviceEndpoint(this, configuration);
 	}
 
-	private SpringWebserviceConfiguration createConsumerConfiguration(String uri, String remaining, Map<String, Object> parameters) {
-		CamelEndpointMapping endpointMapping = resolveAndRemoveReferenceParameter(parameters, "endpointMapping", CamelEndpointMapping.class, null);
-		if (endpointMapping == null) {
-			throw new RuntimeCamelException("No CamelEndpointMapping bean found in Spring ApplicationContext, this bean is required for Spring-WS consumer support");
-		}		
-		configuration = new SpringWebserviceConfiguration();
-        configuration.setEndpointMapping(endpointMapping);
-        
+	private void createConsumerConfiguration(String remaining, Map<String, Object> parameters, SpringWebserviceConfiguration configuration) {
 		EndpointMappingType type = EndpointMappingType.getTypeFromUriPrefix(remaining);
         if (type != null) {
+        	LOG.debug("Building Spring Web Services consumer of type " + type);
+        	
             String lookupKey = remaining.substring(type.getPrefix().length());
             if (lookupKey.startsWith("//")) {
             	lookupKey = lookupKey.substring(2);
             }
-            String xpathExpression = getAndRemoveParameter(parameters, "expression", String.class);
-            if (xpathExpression != null && EndpointMappingType.XPATHRESULT.equals(type)) {
-            	XPathExpression expression = XPathExpressionFactory.createXPathExpression(xpathExpression);
-            	configuration.setEndpointMappingKey(new EndpointMappingKey(type, lookupKey, expression));
-            } else {
+            
+        	if (EndpointMappingType.BEANNAME.equals(type)) {
+        		// Obtain CamelEndpointDispatcher with the given name from registry
+        		CamelEndpointDispatcher endpoint = getCamelContext().getRegistry().lookup(lookupKey, CamelEndpointDispatcher.class);
+        		if (endpoint == null) {
+        			throw new RuntimeCamelException("No CamelEndpointDispatcher found in Spring ApplicationContext with the given name");
+        		}
+        		configuration.setEndpointDispatcher(endpoint);
+        	} else {
+        		// Obtain generic CamelEndpointMapping from registry
+        		CamelEndpointMapping endpointMapping = resolveAndRemoveReferenceParameter(parameters, "endpointMapping", CamelEndpointMapping.class, null);
+        		if (endpointMapping == null && configuration.getEndpointDispatcher() == null) {
+        			throw new RuntimeCamelException("No CamelEndpointMapping found in Spring ApplicationContext. This bean is required " +
+        					"for Spring-WS consumer support (unless the 'springws:beanname:' URI scheme is used)");
+        		}
+                configuration.setEndpointMapping(endpointMapping);
+        	}
+        	
+        	if (EndpointMappingType.XPATHRESULT.equals(type)) {
+                String xpathExpression = getAndRemoveParameter(parameters, "expression", String.class);
+                if (xpathExpression == null) {
+                	throw new RuntimeCamelException("Expression parameter is required when using XPath endpoint mapping");
+                }
+                XPathExpression expression = XPathExpressionFactory.createXPathExpression(xpathExpression);
+                configuration.setEndpointMappingKey(new EndpointMappingKey(type, lookupKey, expression));
+        	} else {
                 configuration.setEndpointMappingKey(new EndpointMappingKey(type, lookupKey, null));
             }
         }
-        return configuration;
 	}
 
-
-	private SpringWebserviceConfiguration createProducerConfiguration(String uri, String remaining, Map<String, Object> parameters) throws URISyntaxException {
-		URI webServiceEndpointUri = new URI(remaining);
-		
-        // Get a WebServiceTemplate from the registry if specified by an option on the component, else create a new template with Spring-WS defaults
-        WebServiceTemplate webServiceTemplate = resolveAndRemoveReferenceParameter(parameters, "webServiceTemplate", WebServiceTemplate.class, new WebServiceTemplate());
-    	WebServiceMessageSender messageSender = resolveAndRemoveReferenceParameter(parameters, "messageSender", WebServiceMessageSender.class, null);
-    	WebServiceMessageFactory messageFactory = resolveAndRemoveReferenceParameter(parameters, "messageFactory", WebServiceMessageFactory.class, null);
-    	
-        if (webServiceTemplate.getDefaultUri() == null) {
-            webServiceTemplate.setDefaultUri(webServiceEndpointUri.toString());
-        }
-        if (messageSender != null) {
-        	webServiceTemplate.setMessageSender(messageSender);
-        }
-        if (messageFactory != null) {
-        	webServiceTemplate.setMessageFactory(messageFactory);
-        }
-        configuration = new SpringWebserviceConfiguration();
-        configuration.setWebServiceTemplate(webServiceTemplate);
-        return configuration;
+	private void createProducerConfiguration(String remaining, Map<String, Object> parameters, SpringWebserviceConfiguration configuration) throws URISyntaxException {
+		if (configuration.getEndpointMapping() == null && configuration.getEndpointDispatcher() == null) {
+        	LOG.debug("Building Spring Web Services producer");
+			URI webServiceEndpointUri = new URI(UnsafeUriCharactersEncoder.encode(remaining));
+			
+	        // Obtain a WebServiceTemplate from the registry when specified by an option on the component, else create a new template with Spring-WS defaults
+	        WebServiceTemplate webServiceTemplate = resolveAndRemoveReferenceParameter(parameters, "webServiceTemplate", WebServiceTemplate.class, new WebServiceTemplate());
+	    	WebServiceMessageSender messageSender = resolveAndRemoveReferenceParameter(parameters, "messageSender", WebServiceMessageSender.class, null);
+	    	WebServiceMessageFactory messageFactory = resolveAndRemoveReferenceParameter(parameters, "messageFactory", WebServiceMessageFactory.class, null);
+	    	
+	        if (webServiceTemplate.getDefaultUri() == null) {
+	            webServiceTemplate.setDefaultUri(webServiceEndpointUri.toString());
+	        }
+	        if (messageSender != null) {
+	        	webServiceTemplate.setMessageSender(messageSender);
+	        }
+	        if (messageFactory != null) {
+	        	webServiceTemplate.setMessageFactory(messageFactory);
+	        }
+	        configuration.setWebServiceTemplate(webServiceTemplate);
+		}
 	}
+	
+
 }
