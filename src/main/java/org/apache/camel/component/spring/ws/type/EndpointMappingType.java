@@ -23,7 +23,8 @@ public enum EndpointMappingType {
 	ROOT_QNAME("rootqname:"), 
 	SOAP_ACTION("soapaction:"), 
 	XPATHRESULT("xpathresult:"), 
-	URI("uri:");
+	URI("uri:"),
+	BEANNAME("beanname:");
 	
 	private String prefix;
 

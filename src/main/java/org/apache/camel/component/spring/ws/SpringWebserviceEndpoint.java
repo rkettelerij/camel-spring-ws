@@ -32,7 +32,11 @@ public class SpringWebserviceEndpoint extends DefaultEndpoint {
 	}
 
 	public Consumer createConsumer(Processor processor) throws Exception {
-		return new SpringWebserviceConsumer(this, processor);
+		SpringWebserviceConsumer consumer = new SpringWebserviceConsumer(this, processor);
+		if (configuration.getEndpointDispatcher() != null) {
+			configuration.getEndpointDispatcher().setConsumerMessageEndpoint(consumer);			
+		}
+		return consumer;
 	}
 
 	public Producer createProducer() throws Exception {

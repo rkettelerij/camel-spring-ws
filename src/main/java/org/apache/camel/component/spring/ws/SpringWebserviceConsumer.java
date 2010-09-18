@@ -40,6 +40,11 @@ import org.springframework.ws.soap.SoapHeaderElement;
 import org.springframework.ws.soap.SoapMessage;
 import org.springframework.xml.transform.TransformerObjectSupport;
 
+/**
+ * 
+ * @author Richard Kettelerij
+ * 
+ */
 public class SpringWebserviceConsumer extends DefaultConsumer implements MessageEndpoint {
 	
 	private SpringWebserviceEndpoint endpoint;
@@ -63,7 +68,7 @@ public class SpringWebserviceConsumer extends DefaultConsumer implements Message
 				exchange.setProperty(propertyName, messageContext.getProperty(propertyName));
 			}
 		}
-		
+
 		// convert SOAP headers to Camel exchange headers
 		WebServiceMessage request = messageContext.getRequest();
 		Map<String, Object> headers = new HashMap<String, Object>();
@@ -118,13 +123,17 @@ public class SpringWebserviceConsumer extends DefaultConsumer implements Message
 
 	@Override
 	protected void doStop() throws Exception {
-		configuration.getEndpointMapping().removeConsumer(configuration.getEndpointMappingKey());
+		if (configuration.getEndpointMapping() != null) {
+			configuration.getEndpointMapping().removeConsumer(configuration.getEndpointMappingKey());
+		}
 		super.doStop();
 	}
 
 	@Override
 	protected void doStart() throws Exception {
-		configuration.getEndpointMapping().addConsumer(configuration.getEndpointMappingKey(), this);
+		if (configuration.getEndpointMapping() != null) {
+			configuration.getEndpointMapping().addConsumer(configuration.getEndpointMappingKey(), this);
+		}
 		super.doStart();
 	}
 
