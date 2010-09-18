@@ -34,6 +34,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.ws.context.MessageContext;
 import org.springframework.ws.server.EndpointInterceptor;
 import org.springframework.ws.server.EndpointInvocationChain;
+import org.springframework.ws.server.EndpointMapping;
 import org.springframework.ws.server.endpoint.MessageEndpoint;
 import org.springframework.ws.server.endpoint.mapping.AbstractEndpointMapping;
 import org.springframework.ws.server.endpoint.support.PayloadRootUtils;
@@ -46,12 +47,36 @@ import org.springframework.xml.xpath.XPathExpression;
 import org.w3c.dom.Element;
 
 /**
- * This class should be registered as a Spring bean in the <tt>ApplicationContext</tt>.
+ * Spring {@link EndpointMapping} for mapping messages to corresponding Camel endpoints. 
+ * This class needs to be registered in the Spring <tt>ApplicationContext</tt> when 
+ * consuming messages using any of the following URI schemes:
+ * 
+ * <ul>
+ * <li><tt>springws:rootqname:</tt><br/>
+ * Equivalent to endpoint mappings specified through {@link org.springframework.ws.server.endpoint.mapping.PayloadRootQNameEndpointMapping}
+ * 
+ * <li><tt>springws:soapaction:</tt><br/>
+ * Equivalent to endpoint mappings specified through {@link org.springframework.ws.soap.server.endpoint.mapping.SoapActionEndpointMapping}
+ *  
+ * <li><tt>springws:uri:</tt><br/>
+ * Equivalent to endpoint mappings specified through {@link org.springframework.ws.server.endpoint.mapping.UriEndpointMapping}
+ *  
+ * <li><tt>springws:xpathresult:</tt><br/>
+ * Equivalent to endpoint mappings specified through {@link org.springframework.ws.server.endpoint.mapping.XPathPayloadEndpointMapping}
+ * </ul>
+ * 
+ * @see org.springframework.ws.server.endpoint.mapping.AbstractEndpointMapping
+ * @see org.springframework.ws.server.endpoint.mapping.PayloadRootQNameEndpointMapping
+ * @see org.springframework.ws.server.endpoint.mapping.UriEndpointMapping
+ * @see org.springframework.ws.server.endpoint.mapping.XPathPayloadEndpointMapping
+ * @see org.springframework.ws.soap.server.endpoint.mapping.SoapActionEndpointMapping
  * 
  * @author Richard Kettelerij
+ * 
  */
 public class CamelEndpointMapping extends AbstractEndpointMapping {
 	
+	private static final String DOUBLE_QUOTE = "\"";
 	private Map<EndpointMappingKey, MessageEndpoint> endpoints = new ConcurrentHashMap<EndpointMappingKey, MessageEndpoint>();
     private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
@@ -89,18 +114,21 @@ public class CamelEndpointMapping extends AbstractEndpointMapping {
     			Object messageKey = getSoapAction(messageContext);
     			if (messageKey != null && key.getLookupKey().equals(messageKey)) {
     				return new SoapEndpointInvocationChain(endpoint, interceptors);
-    				// TODO in future, add support for SOAP actors/roles and ultimate receiver
+    				// possibly add support for SOAP actors/roles and ultimate receiver in the future
     			}
     		}
 		}
         return super.createEndpointInvocationChain(messageContext, endpoint, interceptors);
     }
 
+    /**
+     * Roughly equivalent to {@link org.springframework.ws.soap.server.endpoint.mapping.SoapActionEndpointMapping#getEndpoint(MessageContext)}
+     */
 	private String getSoapAction(MessageContext messageContext) {
 		if (messageContext.getRequest() instanceof SoapMessage) {
             SoapMessage request = (SoapMessage) messageContext.getRequest();
             String soapAction = request.getSoapAction();
-            if (StringUtils.hasLength(soapAction) && soapAction.charAt(0) == '"' && soapAction.charAt(soapAction.length() - 1) == '"') {
+            if (StringUtils.hasLength(soapAction) && soapAction.startsWith(DOUBLE_QUOTE) && soapAction.endsWith(DOUBLE_QUOTE)) {
                 return soapAction.substring(1, soapAction.length() - 1);
             }
             return soapAction;
@@ -108,22 +136,31 @@ public class CamelEndpointMapping extends AbstractEndpointMapping {
         return null;
 	}
 
+    /**
+     * Roughly equivalent to {@link org.springframework.ws.server.endpoint.mapping.UriEndpointMapping#getEndpoint(MessageContext)}
+     */
 	private String getUri() throws URISyntaxException {
 		TransportContext transportContext = TransportContextHolder.getTransportContext();
         if (transportContext != null) {
-            WebServiceConnection connection = transportContext.getConnection();
-            if (connection != null) {
-                return connection.getUri().toString();
+            WebServiceConnection webServiceConnection = transportContext.getConnection();
+            if (webServiceConnection != null) {
+                return webServiceConnection.getUri().toString();
             }
         }
         return null;
 	}
 
+    /**
+     * Roughly equivalent to {@link org.springframework.ws.server.endpoint.mapping.PayloadRootQNameEndpointMapping#getEndpoint(MessageContext)}
+     */
 	private String getRootQName(MessageContext messageContext) throws TransformerException, XMLStreamException {
 		QName qName = PayloadRootUtils.getPayloadRootQName(messageContext.getRequest().getPayloadSource(), transformerFactory);
 		return qName != null ? qName.toString() : null;
 	}
 
+    /**
+     * Roughly equivalent to {@link org.springframework.ws.server.endpoint.mapping.XPathPayloadEndpointMapping#getEndpoint(MessageContext)}
+     */
 	private String getXPathResult(MessageContext messageContext, XPathExpression expression) throws TransformerException, XMLStreamException {
 		if (expression != null) {
 	        Transformer transformer = transformerFactory.newTransformer();
@@ -135,10 +172,19 @@ public class CamelEndpointMapping extends AbstractEndpointMapping {
 		return null;
 	}
 	
+	/**
+	 * Used by Camel Spring Web Services endpoint to register consumers
+	 * @param key unique consumer key
+	 * @param endpoint consumer
+	 */
 	public void addConsumer(EndpointMappingKey key, MessageEndpoint endpoint) {
 		endpoints.put(key, endpoint);
 	}
 	
+	/**
+	 * Used by Camel Spring Web Services endpoint to unregister consumers
+	 * @param key unique consumer key
+	 */
 	public void removeConsumer(Object key) {
 		endpoints.remove(key);
 	}
