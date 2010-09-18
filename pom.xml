@@ -16,9 +16,9 @@
 
 	<groupId>org.apache.camel</groupId>
 	<artifactId>camel-spring-ws</artifactId>
-	<name>Camel :: Spring Webservices</name>
+	<name>Camel :: Spring Web Services</name>
 	<version>1.0-SNAPSHOT</version>
-	<description>Camel support for Spring Webservices</description>
+	<description>Camel support for Spring Web Services</description>
 
 	<properties>
 		<camel.osgi.export.pkg>org.apache.camel.component.spring.ws.*</camel.osgi.export.pkg>
@@ -30,29 +30,36 @@
 			<name>Spring Milestone Maven Repo</name>
 			<url>http://repository.springsource.com/maven/bundles/milestone</url>
 		</repository>
-
 		<repository>
 			<id>spring.maven.release</id>
 			<name>Spring Release Maven Repo</name>
 			<url>http://repository.springsource.com/maven/bundles/release</url>
 		</repository>
-
 		<repository>
 			<id>com.springsource.repository.bundles.external</id>
 			<name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
 			<url>http://repository.springsource.com/maven/bundles/external</url>
 		</repository>
-
 		<repository>
-			<id>FuseSource</id>
+			<id>fusesource</id>
 			<name>FuseSource</name>
 			<url>http://repo.fusesource.com/maven2</url>
 		</repository>
-
 		<repository>
-			<id>Apache</id>
+			<id>apache</id>
 			<name>Apache</name>
 			<url>http://repository.apache.org</url>
+		</repository>
+		<repository>
+			<id>apache.snapshots</id>
+			<name>Apache Development Snapshot Repository</name>
+			<url>https://repository.apache.org/content/repositories/snapshots/</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 	
@@ -68,12 +75,27 @@
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-core</artifactId>
-			<version>2.3.0</version>
+			<version>2.5-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-spring</artifactId>
-			<version>2.3.0</version>
+			<version>2.5-SNAPSHOT</version>
+			<exclusions>
+				<!-- exclude Spring 3.0, since Spring-WS 1.5 targets Spring 2.5 -->
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-context</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-aop</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-tx</artifactId>
+				</exclusion>
+		   	</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.ws</groupId>
