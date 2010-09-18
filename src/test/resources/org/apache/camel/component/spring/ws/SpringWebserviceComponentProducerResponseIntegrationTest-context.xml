@@ -24,6 +24,10 @@
 			<from uri="springws:xpathresult:GRABME?expression=//GetQuote&amp;endpointMapping=#endpointMapping" />
 			<to uri="responseProcessor" />
 		</route>
+		<route>
+			<from uri="springws:beanname:getQuote?endpointMapping=#endpointMapping" />
+			<to uri="responseProcessor" />
+		</route>
 	</camelContext>
 	
 	<bean id="endpointMapping" class="org.apache.camel.component.spring.ws.bean.CamelEndpointMapping" />
@@ -38,6 +42,7 @@
             <map>
                 <entry key="/stockquote" value-ref="soapHandler"/>
                 <entry key="/stockquote2" value-ref="soapHandler"/>
+                <entry key="/stockquote3" value-ref="soapHandler2"/>
             </map>
         </property>
     </bean>
@@ -47,10 +52,39 @@
         <property name="messageReceiver" ref="messageReceiver"/>
     </bean>
     
+    <bean id="soapHandler2" class="org.springframework.ws.transport.http.WebServiceMessageReceiverHttpHandler">
+        <property name="messageFactory" ref="messageFactory"/>
+        <property name="messageReceiver" ref="messageReceiver2"/>
+    </bean>
+    
 	<bean id="messageFactory" class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory" />
 	
 	<bean id="messageReceiver" class="org.springframework.ws.soap.server.SoapMessageDispatcher">
-        <property name="endpointMappings" ref="endpointMapping"/>
+        <property name="endpointMappings">
+        	<list>
+        		<ref bean="endpointMapping"/>
+        	</list>
+        </property>
+    </bean>
+    
+    <bean id="messageReceiver2" class="org.springframework.ws.soap.server.SoapMessageDispatcher">
+        <property name="endpointMappings">
+        	<list>
+        		<ref bean="regularEndpointMapping"/>
+        	</list>
+        </property>
     </bean>
 
+    <bean id="regularEndpointMapping" class="org.springframework.ws.server.endpoint.mapping.PayloadRootQNameEndpointMapping">
+        <property name="mappings">
+            <props>
+                <prop key="{http://www.webserviceX.NET/}GetQuote">getQuote</prop>
+                <prop key="{http://www.webserviceX.NET/}GetQuotes">getQuotes</prop>
+            </props>
+        </property>
+    </bean>
+
+	<bean id="getQuote" class="org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher" />
+	
+	<bean id="getQuotes" class="org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher" />
 </beans>

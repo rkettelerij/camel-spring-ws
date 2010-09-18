@@ -102,6 +102,16 @@ public class SpringWebserviceComponentProducerResponseIntegrationTest extends Ca
 		assertNotNull(result);
 		assertEquals(expectedResponse, sw.toString());
 	}
+	
+	@Test
+	public void testBeanName() throws Exception {
+		StreamSource source = new StreamSource(new StringReader(xmlRequestForGoogleStockQuote));
+		StringWriter sw = new StringWriter();
+		StreamResult result = new StreamResult(sw);
+		webServiceTemplate.sendSourceAndReceiveToResult("http://localhost:8080/stockquote3", source, result);
+		assertNotNull(result);
+		assertEquals(expectedResponse, sw.toString());
+	}
 
 	@Override
 	protected AbstractXmlApplicationContext createApplicationContext() {
