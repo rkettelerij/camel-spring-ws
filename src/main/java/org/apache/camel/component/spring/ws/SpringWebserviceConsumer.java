@@ -60,17 +60,45 @@ public class SpringWebserviceConsumer extends DefaultConsumer implements Message
 	 * Invoked by Spring-WS when a {@link WebServiceMessage} is received
 	 */
 	public void invoke(MessageContext messageContext) throws Exception {
-		// convert WebserviceMessage properties (added through interceptors) to Camel exchange properties
 		Exchange exchange = new DefaultExchange(endpoint.getCamelContext(), ExchangePattern.InOptionalOut);
+		populateExchangeFromMessageContext(messageContext, exchange);
+		
+		// start message processing
+		getProcessor().process(exchange);
+		
+		// create webservice response from output body
+		if (exchange.getPattern().isOutCapable()) {
+			Message responseMessage = exchange.getOut(Message.class);
+			if (responseMessage != null) {
+				Source responseBody = responseMessage.getBody(Source.class);
+				WebServiceMessage response = messageContext.getResponse();
+				TransformerSupportDelegate transformerSupportDelegate = new TransformerSupportDelegate();
+				transformerSupportDelegate.transformSourceToResult(responseBody, response.getPayloadResult());
+			}
+		}
+	}
+
+	private void populateExchangeFromMessageContext(MessageContext messageContext, Exchange exchange) {
+		populateExchangeWithPropertiesFromMessageContext(messageContext, exchange);
+		
+		// create inbound message
+		WebServiceMessage request = messageContext.getRequest();
+		SpringWebserviceMessage inMessage = new SpringWebserviceMessage(request);
+		inMessage.setHeaders(extractSoapHeadersFromWebServiceMessage(request));
+		exchange.setIn(inMessage);
+	}
+
+	private void populateExchangeWithPropertiesFromMessageContext(MessageContext messageContext, Exchange exchange) {
+		// convert WebserviceMessage properties (added through interceptors) to Camel exchange properties
 		String[] propertyNames = messageContext.getPropertyNames();
 		if (propertyNames != null) {
 			for (String propertyName : propertyNames) {
 				exchange.setProperty(propertyName, messageContext.getProperty(propertyName));
 			}
 		}
-
-		// convert SOAP headers to Camel exchange headers
-		WebServiceMessage request = messageContext.getRequest();
+	}
+	
+	private Map<String, Object> extractSoapHeadersFromWebServiceMessage(WebServiceMessage request) {
 		Map<String, Object> headers = new HashMap<String, Object>();
 		if (request instanceof SoapMessage) {
 			SoapMessage soapMessage = (SoapMessage) request;
@@ -91,25 +119,7 @@ public class SpringWebserviceConsumer extends DefaultConsumer implements Message
 				}
 			}
 		}
-
-		// create inbound message
-		SpringWebserviceMessage inMessage = new SpringWebserviceMessage(request);
-		inMessage.setHeaders(headers);
-		exchange.setIn(inMessage);
-		
-		// start message processing
-		getProcessor().process(exchange);
-		
-		// create webservice response from output body
-		if (exchange.getPattern().isOutCapable()) {
-			Message responseMessage = exchange.getOut(Message.class);
-			if (responseMessage != null) {
-				Source responseBody = responseMessage.getBody(Source.class);
-				WebServiceMessage response = messageContext.getResponse();
-				TransformerSupportDelegate transformerSupportDelegate = new TransformerSupportDelegate();
-				transformerSupportDelegate.transformSourceToResult(responseBody, response.getPayloadResult());
-			}
-		}
+		return headers;
 	}
 	
 	/**

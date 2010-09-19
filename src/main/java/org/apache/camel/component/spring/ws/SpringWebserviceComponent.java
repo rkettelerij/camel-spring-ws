@@ -66,35 +66,14 @@ public class SpringWebserviceComponent extends DefaultComponent {
 		EndpointMappingType type = EndpointMappingType.getTypeFromUriPrefix(remaining);
         if (type != null) {
         	LOG.debug("Building Spring Web Services consumer of type " + type);
-        	
-            String lookupKey = remaining.substring(type.getPrefix().length());
-            if (lookupKey.startsWith("//")) {
-            	lookupKey = lookupKey.substring(2);
-            }
-            
+            String lookupKey = getLookupKey(remaining, type);
         	if (EndpointMappingType.BEANNAME.equals(type)) {
-        		// Obtain CamelEndpointDispatcher with the given name from registry
-        		CamelEndpointDispatcher endpoint = getCamelContext().getRegistry().lookup(lookupKey, CamelEndpointDispatcher.class);
-        		if (endpoint == null) {
-        			throw new RuntimeCamelException("No CamelEndpointDispatcher found in Spring ApplicationContext with the given name");
-        		}
-        		configuration.setEndpointDispatcher(endpoint);
+        		addEndpointDispatcherToConfiguration(configuration, lookupKey);
         	} else {
-        		// Obtain generic CamelEndpointMapping from registry
-        		CamelEndpointMapping endpointMapping = resolveAndRemoveReferenceParameter(parameters, "endpointMapping", CamelEndpointMapping.class, null);
-        		if (endpointMapping == null && configuration.getEndpointDispatcher() == null) {
-        			throw new RuntimeCamelException("No CamelEndpointMapping found in Spring ApplicationContext. This bean is required " +
-        					"for Spring-WS consumer support (unless the 'springws:beanname:' URI scheme is used)");
-        		}
-                configuration.setEndpointMapping(endpointMapping);
+        		addEndpointMappingToConfiguration(parameters, configuration);
         	}
-        	
         	if (EndpointMappingType.XPATHRESULT.equals(type)) {
-                String xpathExpression = getAndRemoveParameter(parameters, "expression", String.class);
-                if (xpathExpression == null) {
-                	throw new RuntimeCamelException("Expression parameter is required when using XPath endpoint mapping");
-                }
-                XPathExpression expression = XPathExpressionFactory.createXPathExpression(xpathExpression);
+                XPathExpression expression = getXPathExpressionFromParameters(parameters);
                 configuration.setEndpointMappingKey(new EndpointMappingKey(type, lookupKey, expression));
         	} else {
                 configuration.setEndpointMappingKey(new EndpointMappingKey(type, lookupKey, null));
@@ -125,5 +104,36 @@ public class SpringWebserviceComponent extends DefaultComponent {
 		}
 	}
 	
+	private String getLookupKey(String remaining, EndpointMappingType type) {
+		String lookupKey = remaining.substring(type.getPrefix().length());
+		return lookupKey.startsWith("//") ? lookupKey.substring(2) : lookupKey;
+	}
 
+	private XPathExpression getXPathExpressionFromParameters(Map<String, Object> parameters) {
+		String xpathExpression = getAndRemoveParameter(parameters, "expression", String.class);
+		if (xpathExpression == null) {
+			throw new RuntimeCamelException("Expression parameter is required when using XPath endpoint mapping");
+		}
+		XPathExpression expression = XPathExpressionFactory.createXPathExpression(xpathExpression);
+		return expression;
+	}
+
+	private void addEndpointMappingToConfiguration(Map<String, Object> parameters, SpringWebserviceConfiguration configuration) {
+		// Obtain generic CamelEndpointMapping from registry
+		CamelEndpointMapping endpointMapping = resolveAndRemoveReferenceParameter(parameters, "endpointMapping", CamelEndpointMapping.class, null);
+		if (endpointMapping == null && configuration.getEndpointDispatcher() == null) {
+			throw new RuntimeCamelException("No CamelEndpointMapping found in Spring ApplicationContext. This bean is required " +
+					"for Spring-WS consumer support (unless the 'springws:beanname:' URI scheme is used)");
+		}
+		configuration.setEndpointMapping(endpointMapping);
+	}
+
+	private void addEndpointDispatcherToConfiguration(SpringWebserviceConfiguration configuration, String lookupKey) {
+		// Obtain CamelEndpointDispatcher with the given name from registry
+		CamelEndpointDispatcher endpoint = getCamelContext().getRegistry().lookup(lookupKey, CamelEndpointDispatcher.class);
+		if (endpoint == null) {
+			throw new RuntimeCamelException("No CamelEndpointDispatcher found in Spring ApplicationContext with the given name");
+		}
+		configuration.setEndpointDispatcher(endpoint);
+	}
 }
