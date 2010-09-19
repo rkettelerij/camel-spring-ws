@@ -40,11 +40,6 @@ import org.springframework.ws.soap.SoapHeaderElement;
 import org.springframework.ws.soap.SoapMessage;
 import org.springframework.xml.transform.TransformerObjectSupport;
 
-/**
- * 
- * @author Richard Kettelerij
- * 
- */
 public class SpringWebserviceConsumer extends DefaultConsumer implements MessageEndpoint {
 	
 	private SpringWebserviceEndpoint endpoint;
