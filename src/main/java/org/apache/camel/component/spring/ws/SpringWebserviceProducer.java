@@ -31,7 +31,6 @@ import org.springframework.ws.client.core.SourceExtractor;
 import org.springframework.ws.client.core.WebServiceMessageCallback;
 import org.springframework.ws.soap.addressing.client.ActionCallback;
 import org.springframework.ws.soap.client.core.SoapActionCallback;
-import org.springframework.xml.transform.TransformerObjectSupport;
 
 public class SpringWebserviceProducer extends DefaultProducer {
 
@@ -90,7 +89,7 @@ public class SpringWebserviceProducer extends DefaultProducer {
 	 * A {@link SourceExtractor} that performs no conversion, instead conversion
 	 * is handled by Camel's {@link TypeConverter} hierarchy.
 	 */
-	private static class NoopSourceExtractor extends TransformerObjectSupport implements SourceExtractor {
+	private static class NoopSourceExtractor implements SourceExtractor {
 		public Object extractData(Source source) throws IOException, TransformerException {
 			return source;
 		}
