@@ -3,14 +3,15 @@ h1. Spring Web Services component
 This component allows you to integrate with "Spring Web Services":http://static.springsource.org/spring-ws/sites/1.5/. It offers both _client_-side support, for accessing web services, and _server_-side support for creating your own contract-first web services.
  
 Maven users will need to add the following dependency to their pom.xml for this component:
-<code>
+
+<pre>
 <dependency>
 	<groupId>org.apache.camel</groupId>
 	<artifactId>camel-spring-ws</artifactId>
 	<version>x.x.x</version>
 	<!-- use the same version as your Camel core version -->
 </dependency>
-</code>
+</pre>
 
 h3. Dependencies
 
