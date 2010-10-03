@@ -123,12 +123,12 @@ h3. POJO (un)marshalling
 
 Camel's pluggable data format's offer support for pojo/xml marshalling using JAXB, XStream, Castor and XMLBeans. You can use these data format's in your route to sent and receive pojo's to and from web services.
 
-<code>
+<pre>
 JaxbDataFormat jaxb = new JaxbDataFormat(false);
 jaxb.setContextPath("com.example.model");
 
 from("direct:example").marshal(jaxb).to("springws:http://foo.com/bar").convertBodyTo(String.class);
-</code>
+</pre>
 
 To marshall the request and unmarshall the response message:
 <code>
