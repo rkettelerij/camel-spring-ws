@@ -14,7 +14,7 @@ Maven users will need to add the following dependency to their pom.xml for this 
 
 h3. Dependencies
 
-This component offers support for Spring-WS 1.5.9 (the latest GA release) which is compatible with Spring 2.5.x. In order to run Spring-WS 1.5.9 on Spring 3.0 you need to exclude the OXM module from Spring 3.0 as this module is also included in Spring-WS 1.5.9 (see "this post":http://stackoverflow.com/questions/3313314/can-spring-ws-1-5-be-used-with-spring-3).
+This component offers support for Spring-WS 1.5.9 which is compatible with Spring 2.5.x. In order to run Spring-WS 1.5.9 on Spring 3.0 you need to exclude the OXM module from Spring 3.0 as this module is also included in Spring-WS 1.5.9 (see "this post":http://stackoverflow.com/questions/3313314/can-spring-ws-1-5-be-used-with-spring-3).
 
 h2. URI format
 
@@ -29,9 +29,9 @@ To expose a web service *mapping-type* needs to be set to any of the following:
 | @soapaction@ | Used to map web service requests based on the SOAP action specified in the header of the message. |
 | @uri@ | In order to map web service requests that target a specific URI.  |  
 | @xpathresult@ | Used to map web service requests based on the evaluation of an XPath @expression@ against the incoming message. The result of the evaluation should match the XPath result specified in the endpoint URI. | 
-| @beanname@ | Allows you to reference a @org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher@ in order to integrate with existing (map-based) "endpoint mappings":http://static.springsource.org/spring-ws/sites/1.5/reference/html/server.html#server-endpoint-mapping like @PayloadRootQNameEndpointMapping@, @SoapActionEndpointMapping@, etc | 
+| @beanname@ | Allows you to reference a @org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher@ in order to integrate with existing (legacy) "map-based endpoint mappings":http://static.springsource.org/spring-ws/sites/1.5/reference/html/server.html#server-endpoint-mapping like @PayloadRootQNameEndpointMapping@, @SoapActionEndpointMapping@, etc | 
 
-As a consumer the *address* should contain a value relevant to the specified mapping-type (e.g. SOAP action, XPath expression). As a provider the address can be set to the URI of the web service your calling upon.
+As a consumer the *address* should contain a value relevant to the specified mapping-type (e.g. a SOAP action, XPath expression). As a provider the address should be set to the URI of the web service your calling upon.
 
 You can append query options to the URI in the following format, @?option=value&option=value&...@
 
@@ -48,52 +48,59 @@ The following options can be specified in the registry (most likely a Spring App
 
 | Name | Required? | Description |
 | @webServiceTemplate@ | No | Option to provide a custom "WebServiceTemplate":http://static.springsource.org/spring-ws/sites/1.5/apidocs/org/springframework/ws/client/core/WebServiceTemplate.html. This allows for full control over  client-side web services handling; like adding a custom interceptor or specifying a fault resolver, message sender or message factory. | 
-| @messageSender@ | No | Option to provide a custom "WebServiceMessageSender":http://static.springsource.org/spring-ws/sites/1.5/apidocs/org/springframework/ws/transport/WebServiceMessageSender.html, useful when there's no need to override the default WebServiceTemplate | 
-| @messageFactory@ | No | Option to provide a custom "WebServiceMessageFactory":http://static.springsource.org/spring-ws/sites/1.5/apidocs/org/springframework/ws/WebServiceMessageFactory.html, useful when there's no need to override the default WebServiceTemplate | 
-| @endpointMapping@ | Only when _mapping-type_ is @rootqname@, @soapaction@, @uri@ or @xpathresult@ | Reference to @org.apache.camel.component.spring.ws.bean.CamelEndpointMapping@ in the Registry/ApplicationContext. Only one bean is required in the registry to serve all Camel/Spring-WS endpoints. This bean is auto-discovered by the "MessageDispatcher":http://static.springsource.org/spring-ws/sites/1.5/apidocs/org/springframework/ws/server/MessageDispatcher.html and used to map requests to Camel endpoints based on characteristics specified on the endpoint (like root QName, SOAP action, etc) |
-| @endpointDispatcher@ | Only when _mapping-type_ is @beanname@ | Reference to @org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher@ in the Registry/ApplicationContext. For every endpoint with mapping-type @beanname@ one bean with a corresponding name is required in the registry. This bean acts as a bridge between the Camel endpoint and an existing "EndpointMapping":http://static.springsource.org/spring-ws/sites/1.5/reference/html/server.html#server-endpoint-mapping. |
+| @messageSender@ | No | Option to provide a custom "WebServiceMessageSender":http://static.springsource.org/spring-ws/sites/1.5/apidocs/org/springframework/ws/transport/WebServiceMessageSender.html. For example to perform authentication or use alternative transports | 
+| @messageFactory@ | No | Option to provide a custom "WebServiceMessageFactory":http://static.springsource.org/spring-ws/sites/1.5/apidocs/org/springframework/ws/WebServiceMessageFactory.html. For example when you want Apache Axiom to handle web service messages instead of SAAJ | 
 | @transformerFactory@ | No | Option to override default TransformerFactory. The provided transformer factory must be of type @javax.xml.transform.TransformerFactory@ |
+| @endpointMapping@ | Only when _mapping-type_ is @rootqname@, @soapaction@, @uri@ or @xpathresult@ | Reference to @org.apache.camel.component.spring.ws.bean.CamelEndpointMapping@ in the Registry/ApplicationContext. Only one bean is required in the registry to serve all Camel/Spring-WS endpoints. This bean is auto-discovered by the "MessageDispatcher":http://static.springsource.org/spring-ws/sites/1.5/apidocs/org/springframework/ws/server/MessageDispatcher.html and used to map requests to Camel endpoints based on characteristics specified on the endpoint (like root QName, SOAP action, etc) |
+| @endpointDispatcher@ | Only when _mapping-type_ is @beanname@ | Reference to @org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher@ in the Registry/ApplicationContext. For every endpoint with mapping-type @beanname@ one bean with a corresponding name is required in the registry. This bean acts as a bridge between the Camel endpoint and an existing "endpoint mappings":http://static.springsource.org/spring-ws/sites/1.5/reference/html/server.html#server-endpoint-mapping |
+
+Note that the use of the @endpointDispatcher@ and the @beanname@ mapping-type is only meant for (legacy) situations where you are already using Spring-WS and have endpoint mappings defined in a Spring XML file. The @beanname:@ mapping-type allows you to wire your Camel route into an existing endpoint mapping. When you're starting from scratch it's recommended to define your endpoint mappings as Camel URI's (illustrated below using @endpointMapping@) since it requires less configuration and is more expressive. Alternatively you could use vanilla Spring-WS with the help of annotations. 
 
 h2. Message headers
 
 | Name | Type | Description |
-| @CamelSpringWebserviceEndpointUri@ | String | URI of the web service when accessing remote services in client mode, overrides _address_ part of the endpoint URI | 
+| @CamelSpringWebserviceEndpointUri@ | String | URI of the web service your accessing as a client, overrides _address_ part of the endpoint URI | 
 | @CamelSpringWebserviceSoapAction@ | String | Header to specify the SOAP action of the message, overrides @soapAction@ option if present | 
 | @CamelSpringWebserviceAddressingAction@ | URI | Use this header to specify the WS-Addressing action of the message, overrides @wsAddressingAction@ option if present |
 
-h2. Client mode, accessing web services
+h2. Accessing web services
 
+To call a webservice at @http://foo.com/bar@ you simply define a route:
 <code>
 from("direct:example")
 .to("springws:http://foo.com/bar")
 </code>
 
+And sent a message:
 <code>
-template.requestBody("direct:example", "<foobar xmlns=\"http://www.foo.com\"><msg>test message</msg></foobar>");
+template.requestBody("direct:example", "<foobar xmlns=\"http://foo.com\"><msg>test message</msg></foobar>");
 </code>
 
 h3. Sending SOAP and WS-Addressing action headers
 
+When the remote web service requires a SOAP action or use of the WS-Addressing standard you define your route as:
 <code>
 from("direct:example")
 .to("springws:http://foo.com/bar?soapAction=http://foo.com&wsAddressingAction=http://bar.com")
 </code>
 
+Optionally you can override the endpoint options with header values:
 <code>
-template.requestHeaderAndBody("direct:example", "<foobar xmlns=\"http://www.foo.com\"><msg>test message</msg></foobar>");
+template.requestBodyAndHeader("direct:example", "<foobar xmlns=\"http://foo.com\"><msg>test message</msg></foobar>", "CamelSpringWebserviceSoapAction", "http://baz.com");
 </code>
 
 h3. Using a custom MessageSender and MessageFactory
 
-Reference a custom MessageSender and MessageFactory in the registry from your endpoint URI.
+A custom MessageSender or MessageFactory in the registry can be referenced from an endpoint URI.
 <code>
 from("direct:example")
-.to("springws:http://foo.com/bar?messageFactory=#sunSaajMessageFactory&messageSender=#commonsHttpMessageSender")
+.to("springws:http://foo.com/bar?messageFactory=#messageFactory&messageSender=#messageSender")
 </code>
 
 Spring configuration:
 <code>
-	 <bean id="commonsHttpMessageSender" class="org.springframework.ws.transport.http.CommonsHttpMessageSender">
+	<!-- authenticate using HTTP Basic Authentication -->
+	 <bean id="messageSender" class="org.springframework.ws.transport.http.CommonsHttpMessageSender">
 		<property name="credentials">
 			<bean class="org.apache.commons.httpclient.UsernamePasswordCredentials">
 				<constructor-arg index="0" value="admin"/>
@@ -103,26 +110,91 @@ Spring configuration:
 	</bean>
 	
 	<!-- force use of Sun SAAJ implementation, http://static.springsource.org/spring-ws/sites/1.5/faq.html#saaj-jboss -->
-	<bean id="sunSaajMessageFactory" class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory">
+	<bean id="messageFactory" class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory">
 		<property name="messageFactory">
-		<bean class="com.sun.xml.messaging.saaj.soap.ver1_1.SOAPMessageFactory1_1Impl"></bean>
+			<bean class="com.sun.xml.messaging.saaj.soap.ver1_1.SOAPMessageFactory1_1Impl"></bean>
 		</property>
 	</bean>
 </code>
 
 h3. POJO (un)marshalling
 
-<pre>
+Camel's pluggable data format's offer support for pojo/xml marshalling using JAXB, XStream, Castor and XMLBeans. You can use these data format's in your route to sent and receive pojo's to and from web services.
+<code>
 JaxbDataFormat jaxb = new JaxbDataFormat(false);
-jaxb.setContextPath("com.example.model);
+jaxb.setContextPath("com.example.model");
 
-from("direct:example")
-.marshal(jaxb)
-.to("springws:http://example.com/mywebservice?soapAction=http://example.com/mywebservice")
-.convertBodyTo(String.class);
-</pre>
+from("direct:example").marshal(jaxb).to("springws:http://foo.com/bar").convertBodyTo(String.class);
+</code>
+
+To also unmarshall the response message:
+<code>
+from("direct:example").marshal(jaxb).to("springws:http://foo.com/bar").unmarshall(jaxb);
+</code>
 
 h2. Exposing web services
 
+In order to expose a web service using this component you first need to set-up a "MessageDispatcher":http://static.springsource.org/spring-ws/sites/1.5/reference/html/server.html to look for endpoint mappings in a Spring XML file. If you plan on running inside a servlet container you probably want to use a MessageDispatcherServlet configured in @web.xml@. 
 
+By default the MessageDispatcherServlet will look for a Spring XML named @/WEB-INF/spring-ws-servlet.xml@. To use Camel with Spring-WS the only mandatory bean in that XML file is @CamelEndpointMapping@. This bean allows the MessageDispatcher to dispatch web service requests to your routes. 
 
+_web.xml_
+<code>
+<web-app>
+    <servlet>
+        <servlet-name>spring-ws</servlet-name>
+        <servlet-class>org.springframework.ws.transport.http.MessageDispatcherServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>spring-ws</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+</web-app>
+</code>
+
+_spring-ws-servlet.xml_
+<code>
+	<bean id="endpointMapping" class="org.apache.camel.component.spring.ws.bean.CamelEndpointMapping" />
+
+	<bean id="wsdl" class="org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition">
+    	<property name="schema"> 
+    		<bean class="org.springframework.xml.xsd.SimpleXsdSchema">                   
+    			<property name="xsd" value="/WEB-INF/foobar.xsd"/>
+			</bean>    
+    	</propert>                                        
+    	<property name="portTypeName" value="FooBar"/>                                
+    	<property name="locationUri" value="/"/>                              
+    	<property name="targetNamespace" value="http://example.com/"/>       
+	</bean>
+</code>
+
+More information on setting up Spring-WS can be found in "Writing Contract-First Web Services":http://static.springsource.org/spring-ws/sites/1.5/reference/html/tutorial.html. Basically paragraph 3.6.2 "Routing the Message to the Endpoint" is where @CamelEndpointMapping@ comes in.
+
+h3. Endpoint mapping in routes
+
+With the XML configuration in-place you can now use Camel's DSL to define which web service request are to be handled by your endpoint.
+
+The following route will receive all web service requests that have a root element named "GetFoo" within the "http://example.com/" namespace.
+<code>
+from("springws:rootqname:{http://example.com/}GetFoo?endpointMapping=#endpointMapping")
+.convertBodyTo(String.class).to(mock:example)
+</code>
+
+The following route will receive web service requests containing the "http://example.com/GetFoo" SOAP action.
+<code>
+from("springws:soapaction:http://example.com/GetFoo?endpointMapping=#endpointMapping")
+.convertBodyTo(String.class).to(mock:example)
+</code>
+
+The following route will receive all requests sent to "http://example.com/foobar".
+<code>
+from("springws:uri:/foobar?endpointMapping=#endpointMapping")
+.convertBodyTo(String.class).to(mock:example)
+</code>
+
+The route below will receive requests that contain the element @<foobar>abc</foobar>@ anywhere inside the message (and the default namespace).
+<code>
+from("springws:xpathresult:abc?expression=//foobar&endpointMapping=#endpointMapping")
+.convertBodyTo(String.class).to(mock:example)
+</code>
