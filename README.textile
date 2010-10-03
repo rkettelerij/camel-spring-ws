@@ -4,12 +4,12 @@ This component allows you to integrate with "Spring Web Services":http://static.
  
 Maven users will need to add the following dependency to their pom.xml for this component:
 <code>
-	<dependency>
-		<groupId>org.apache.camel</groupId>
-		<artifactId>camel-spring-ws</artifactId>
-		<version>x.x.x</version>
-		<!-- use the same version as your Camel core version -->
-	</dependency>
+<dependency>
+	<groupId>org.apache.camel</groupId>
+	<artifactId>camel-spring-ws</artifactId>
+	<version>x.x.x</version>
+	<!-- use the same version as your Camel core version -->
+</dependency>
 </code>
 
 h3. Dependencies
@@ -99,22 +99,22 @@ from("direct:example")
 
 Spring configuration:
 <code>
-	<!-- authenticate using HTTP Basic Authentication -->
-	 <bean id="messageSender" class="org.springframework.ws.transport.http.CommonsHttpMessageSender">
-		<property name="credentials">
-			<bean class="org.apache.commons.httpclient.UsernamePasswordCredentials">
-				<constructor-arg index="0" value="admin"/>
-				<constructor-arg index="1" value="secret"/>
-			</bean>
-		</property>
-	</bean>
-	
-	<!-- force use of Sun SAAJ implementation, http://static.springsource.org/spring-ws/sites/1.5/faq.html#saaj-jboss -->
-	<bean id="messageFactory" class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory">
-		<property name="messageFactory">
-			<bean class="com.sun.xml.messaging.saaj.soap.ver1_1.SOAPMessageFactory1_1Impl"></bean>
-		</property>
-	</bean>
+<!-- authenticate using HTTP Basic Authentication -->
+<bean id="messageSender" class="org.springframework.ws.transport.http.CommonsHttpMessageSender">
+	<property name="credentials">
+		<bean class="org.apache.commons.httpclient.UsernamePasswordCredentials">
+			<constructor-arg index="0" value="admin"/>
+			<constructor-arg index="1" value="secret"/>
+		</bean>
+	</property>
+</bean>
+
+<!-- force use of Sun SAAJ implementation, http://static.springsource.org/spring-ws/sites/1.5/faq.html#saaj-jboss -->
+<bean id="messageFactory" class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory">
+	<property name="messageFactory">
+		<bean class="com.sun.xml.messaging.saaj.soap.ver1_1.SOAPMessageFactory1_1Impl"></bean>
+	</property>
+</bean>
 </code>
 
 h3. POJO (un)marshalling
@@ -155,18 +155,18 @@ _web.xml_
 
 _spring-ws-servlet.xml_
 <code>
-	<bean id="endpointMapping" class="org.apache.camel.component.spring.ws.bean.CamelEndpointMapping" />
-	
-	<bean id="wsdl" class="org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition">
-    	<property name="schema"> 
-    		<bean class="org.springframework.xml.xsd.SimpleXsdSchema">                   
-    			<property name="xsd" value="/WEB-INF/foobar.xsd"/>
-			</bean>    
-    	</propert>                                        
-    	<property name="portTypeName" value="FooBar"/>                                
-    	<property name="locationUri" value="/"/>                              
-    	<property name="targetNamespace" value="http://example.com/"/>       
-	</bean>
+<bean id="endpointMapping" class="org.apache.camel.component.spring.ws.bean.CamelEndpointMapping" />
+
+<bean id="wsdl" class="org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition">
+	<property name="schema"> 
+		<bean class="org.springframework.xml.xsd.SimpleXsdSchema">                   
+			<property name="xsd" value="/WEB-INF/foobar.xsd"/>
+		</bean>    
+	</propert>                                        
+	<property name="portTypeName" value="FooBar"/>                                
+	<property name="locationUri" value="/"/>                              
+	<property name="targetNamespace" value="http://example.com/"/>       
+</bean>
 </code>
 
 More information on setting up Spring-WS can be found in "Writing Contract-First Web Services":http://static.springsource.org/spring-ws/sites/1.5/reference/html/tutorial.html. Basically paragraph 3.6.2 "Routing the Message to the Endpoint" is where @CamelEndpointMapping@ comes in.
