@@ -122,6 +122,7 @@ Spring configuration:
 h3. POJO (un)marshalling
 
 Camel's pluggable data format's offer support for pojo/xml marshalling using JAXB, XStream, Castor and XMLBeans. You can use these data format's in your route to sent and receive pojo's to and from web services.
+
 <code>
 JaxbDataFormat jaxb = new JaxbDataFormat(false);
 jaxb.setContextPath("com.example.model");
