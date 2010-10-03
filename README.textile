@@ -99,7 +99,8 @@ from("direct:example")
 </code>
 
 Spring configuration:
-<code>
+
+<pre>
 <!-- authenticate using HTTP Basic Authentication -->
 <bean id="messageSender" class="org.springframework.ws.transport.http.CommonsHttpMessageSender">
 	<property name="credentials">
@@ -116,7 +117,7 @@ Spring configuration:
 		<bean class="com.sun.xml.messaging.saaj.soap.ver1_1.SOAPMessageFactory1_1Impl"></bean>
 	</property>
 </bean>
-</code>
+</pre>
 
 h3. POJO (un)marshalling
 
@@ -140,7 +141,8 @@ In order to expose a web service using this component you first need to set-up a
 By default the MessageDispatcherServlet will look for a Spring XML named @/WEB-INF/spring-ws-servlet.xml@. To use Camel with Spring-WS the only mandatory bean in that XML file is @CamelEndpointMapping@. This bean allows the MessageDispatcher to dispatch web service requests to your routes. 
 
 _web.xml_
-<code>
+
+<pre>
 <web-app>
     <servlet>
         <servlet-name>spring-ws</servlet-name>
@@ -152,10 +154,11 @@ _web.xml_
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
 </web-app>
-</code>
+</pre>
 
 _spring-ws-servlet.xml_
-<code>
+
+<pre>
 <bean id="endpointMapping" class="org.apache.camel.component.spring.ws.bean.CamelEndpointMapping" />
 
 <bean id="wsdl" class="org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition">
@@ -168,7 +171,7 @@ _spring-ws-servlet.xml_
 	<property name="locationUri" value="/"/>                              
 	<property name="targetNamespace" value="http://example.com/"/>       
 </bean>
-</code>
+</pre>
 
 More information on setting up Spring-WS can be found in "Writing Contract-First Web Services":http://static.springsource.org/spring-ws/sites/1.5/reference/html/tutorial.html. Basically paragraph 3.6.2 "Routing the Message to the Endpoint" is where @CamelEndpointMapping@ comes in.
 
