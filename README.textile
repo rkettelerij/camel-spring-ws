@@ -5,10 +5,10 @@ This component allows you to integrate with "Spring Web Services":http://static.
 Maven users will need to add the following dependency to their pom.xml for this component:
 <code>
 	<dependency>
-	    <groupId>org.apache.camel</groupId>
-	    <artifactId>camel-spring-ws</artifactId>
-	    <version>x.x.x</version>
-	    <!-- use the same version as your Camel core version -->
+		<groupId>org.apache.camel</groupId>
+		<artifactId>camel-spring-ws</artifactId>
+		<version>x.x.x</version>
+		<!-- use the same version as your Camel core version -->
 	</dependency>
 </code>
 
@@ -156,7 +156,7 @@ _web.xml_
 _spring-ws-servlet.xml_
 <code>
 	<bean id="endpointMapping" class="org.apache.camel.component.spring.ws.bean.CamelEndpointMapping" />
-
+	
 	<bean id="wsdl" class="org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition">
     	<property name="schema"> 
     		<bean class="org.springframework.xml.xsd.SimpleXsdSchema">                   
