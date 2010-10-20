@@ -26,14 +26,19 @@
 
 	<repositories>
 		<repository>
+			<id>spring.maven.release</id>
+			<name>Spring Release Maven Repo</name>
+			<url>http://repository.springsource.com/maven/bundles/release</url>
+		</repository>
+		<repository>
 			<id>spring.maven.milestone</id>
 			<name>Spring Milestone Maven Repo</name>
 			<url>http://repository.springsource.com/maven/bundles/milestone</url>
 		</repository>
 		<repository>
-			<id>spring.maven.release</id>
-			<name>Spring Release Maven Repo</name>
-			<url>http://repository.springsource.com/maven/bundles/release</url>
+			<id>spring.maven.snapshot</id>
+			<name>Spring Snapshot Maven Repo</name>
+			<url>http://maven.springframework.org/snapshot</url>
 		</repository>
 		<repository>
 			<id>com.springsource.repository.bundles.external</id>
@@ -136,6 +141,7 @@
 	    	<groupId>org.apache.httpcomponents</groupId>
 	    	<artifactId>httpclient</artifactId>
 	    	<version>4.0.1</version>
+	    	<classifier>tests</classifier>
 	    	<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -143,6 +149,27 @@
 			<artifactId>camel-jaxb</artifactId>
 			<version>2.3.0</version>
 			<scope>test</scope>
+		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.ws</groupId>-->
+<!--			<artifactId>spring-ws-test</artifactId>-->
+<!--			<version>2.0.0-M4-SNAPSHOT</version>-->
+<!--			<scope>test</scope>-->
+<!--			<exclusions>-->
+<!--				<exclusion>-->
+<!--					<groupId>org.springframework.ws</groupId>-->
+<!--					<artifactId>spring-xml</artifactId>-->
+<!--				</exclusion>-->
+<!--				<exclusion>-->
+<!--					<groupId>org.springframework.ws</groupId>-->
+<!--					<artifactId>spring-ws-core</artifactId>-->
+<!--				</exclusion>-->
+<!--			</exclusions>-->
+<!--		</dependency>-->
+		<dependency>
+		        <groupId>net.javacrumbs</groupId>
+		        <artifactId>spring-ws-test</artifactId>
+		        <version>0.19</version>
 		</dependency>
 
 		<!-- provided -->
@@ -193,8 +220,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.5</source>
+					<target>1.5</target>
 				</configuration>
 			</plugin>
 			<plugin>

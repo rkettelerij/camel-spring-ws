@@ -7,54 +7,58 @@
 	<!-- ============================== -->
 	<!--          Camel routes          -->
 	<!-- ============================== -->
-	<camelContext xmlns="http://camel.apache.org/schema/spring">
+	<camelContext xmlns="http://camel.apache.org/schema/spring" trace="true">
 		<route>
-			<from uri="springws:rootqname:{http://www.webserviceX.NET/}SomeElement?endpointMapping=#endpointMapping" />
+			<from uri="springws:rootqname:{http://www.stockquotes.edu/}SomeElement?endpointMapping=#endpointMapping" />
 			<to uri="mock:testRootQNameDummy" />
 		</route>
 		<route>
-			<from uri="springws:rootqname:{http://www.webserviceX.NET/}GetQuote?endpointMapping=#endpointMapping" />
+			<from uri="springws:rootqname:{http://www.stockquotes.edu/}GetQuote?endpointMapping=#endpointMapping" />
 			<to uri="mock:testRootQName" />
 		</route>
 		<route>
-			<from uri="springws:soapaction:http://www.webserviceX.NET/GetQuote?endpointMapping=#endpointMapping" />
+			<from uri="springws:soapaction:http://www.stockquotes.edu/GetQuote?endpointMapping=#endpointMapping" />
 			<to uri="mock:testSoapAction" />
 		</route>
 		<route>
-			<from uri="springws:uri:/stockquote2?endpointMapping=#endpointMapping" />
+			<from uri="springws:uri:http://localhost/stockquote2?endpointMapping=#endpointMapping" />
 			<to uri="mock:testUri" />
 		</route>
 		<route>
 			<from uri="springws:xpathresult:GRABME?expression=//GetQuote&amp;endpointMapping=#endpointMapping" />
 			<to uri="mock:testXPath" />
 		</route>
+		<route>
+			<from uri="springws:beanname:QuoteEndpointDispatcher" />
+			<to uri="mock:testBeanName" />
+		</route>
 	</camelContext>
 	
 	<bean id="endpointMapping" class="org.apache.camel.component.spring.ws.bean.CamelEndpointMapping" />
+	
+	<bean id="regularEndpointMapping" class="org.springframework.ws.server.endpoint.mapping.PayloadRootQNameEndpointMapping">
+        <property name="mappings">
+            <props>
+                <prop key="{http://www.stockquotes.edu/}GetFuture">FutureEndpointDispatcher</prop>
+                <prop key="{http://www.stockquotes.edu/}GetQuote">QuoteEndpointDispatcher</prop>
+            </props>
+        </property>
+    </bean>
+
+	<bean id="QuoteEndpointDispatcher" class="org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher" />
+	
+	<bean id="FutureEndpointDispatcher" class="org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher" />
 	
 	<bean id="responseProcessor" class="org.apache.camel.component.spring.ws.StockQuoteResponseProcessor" />
 		
 	<!-- ============================== -->
 	<!--   Supporting Spring-WS beans   -->
 	<!-- ============================== -->
-    <bean id="httpServer" class="org.springframework.remoting.support.SimpleHttpServerFactoryBean">
-        <property name="contexts">
-            <map>
-                <entry key="/stockquote" value-ref="soapHandler"/>
-                <entry key="/stockquote2" value-ref="soapHandler"/>
-            </map>
-        </property>
-    </bean>
-
-    <bean id="soapHandler" class="org.springframework.ws.transport.http.WebServiceMessageReceiverHttpHandler">
-        <property name="messageFactory" ref="messageFactory"/>
-        <property name="messageReceiver" ref="messageReceiver"/>
-    </bean>
-    
-	<bean id="messageFactory" class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory" />
-	
-	<bean id="messageReceiver" class="org.springframework.ws.soap.server.SoapMessageDispatcher">
-        <property name="endpointMappings" ref="endpointMapping"/>
-    </bean>
+	<bean id="webServiceTemplate" class="org.springframework.ws.client.core.WebServiceTemplate">
+		<property name="defaultUri" value="http://localhost" />
+		<property name="messageSender">
+			<bean class="net.javacrumbs.springws.test.helper.InMemoryWebServiceMessageSender" />
+		</property>
+	</bean>
 
 </beans>

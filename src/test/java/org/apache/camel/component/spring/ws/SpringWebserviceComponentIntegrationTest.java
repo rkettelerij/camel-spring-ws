@@ -24,6 +24,7 @@ import javax.xml.transform.Source;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.converter.jaxp.StringSource;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
@@ -39,6 +40,7 @@ public class SpringWebserviceComponentIntegrationTest extends AbstractJUnit4Spri
     @Produce
     protected ProducerTemplate template;
     
+	@Ignore("Run manually, makes connection to external webservice")
 	@Test(timeout=5000)
 	public void consumeStockQuoteWebserviceWithDefaultTemplate() throws Exception {
 		Object result = template.requestBody("direct:stockQuoteWebserviceWithDefaultTemplate", xmlRequestForGoogleStockQuote);
@@ -47,6 +49,7 @@ public class SpringWebserviceComponentIntegrationTest extends AbstractJUnit4Spri
 		assertTrue(result instanceof Source);
 	}
 
+	@Ignore("Run manually, makes connection to external webservice")
 	@Test(timeout=5000)
 	public void consumeStockQuoteWebservice() throws Exception {
 		Object result = template.requestBody("direct:stockQuoteWebservice", xmlRequestForGoogleStockQuote);
@@ -55,6 +58,7 @@ public class SpringWebserviceComponentIntegrationTest extends AbstractJUnit4Spri
 		assertTrue(result instanceof Source);
 	}
 	
+	@Ignore("Run manually, makes connection to external webservice")
 	@Test(timeout=5000)
 	public void consumeStockQuoteWebserviceWithCamelStringSourceInput() throws Exception {
 		Object result = template.requestBody("direct:stockQuoteWebservice", new StringSource(xmlRequestForGoogleStockQuote));
@@ -63,6 +67,7 @@ public class SpringWebserviceComponentIntegrationTest extends AbstractJUnit4Spri
 		assertTrue(result instanceof Source);
 	}
 	
+	@Ignore("Run manually, makes connection to external webservice")
 	@Test(timeout=5000)
 	public void consumeStockQuoteWebserviceWithNonDefaultMessageFactory() throws Exception {
 		Object result = template.requestBody("direct:stockQuoteWebserviceWithNonDefaultMessageFactory", xmlRequestForGoogleStockQuote);
@@ -71,6 +76,7 @@ public class SpringWebserviceComponentIntegrationTest extends AbstractJUnit4Spri
 		assertTrue(result instanceof Source);
 	}
 	
+	@Ignore("Run manually, makes connection to external webservice")
 	@Test(timeout=5000)
 	public void consumeStockQuoteWebserviceAndConvertResult() throws Exception {
 		Object result = template.requestBody("direct:stockQuoteWebserviceAsString", xmlRequestForGoogleStockQuote);
@@ -81,6 +87,7 @@ public class SpringWebserviceComponentIntegrationTest extends AbstractJUnit4Spri
 		assertTrue(resultMessage.contains("Google Inc."));
 	}
 	
+	@Ignore("Run manually, makes connection to external webservice")
 	@Test(timeout=5000)
 	public void consumeStockQuoteWebserviceAndProvideEndpointUriByHeader() throws Exception {
 		Object result = template.requestBodyAndHeader("direct:stockQuoteWebserviceWithoutDefaultUri", xmlRequestForGoogleStockQuote, 
@@ -90,14 +97,6 @@ public class SpringWebserviceComponentIntegrationTest extends AbstractJUnit4Spri
 		assertTrue(result instanceof String);
 		String resultMessage = (String) result;
 		assertTrue(resultMessage.contains("Google Inc."));
-	}
-	
-	@Test(timeout=5000)
-	public void consumeStockQuoteWebserviceWithWsAddresing() throws Exception {
-		Object result = template.requestBody("direct:stockQuoteWebserviceWithWsAddresing", xmlRequestForGoogleStockQuote);
-		
-		assertNotNull(result);
-		//assertTrue(result instanceof Source);
 	}
 }
  
