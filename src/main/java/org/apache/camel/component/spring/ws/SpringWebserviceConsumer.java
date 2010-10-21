@@ -21,15 +21,14 @@ import java.util.Iterator;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
-import javax.xml.transform.Result;
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
+import org.apache.camel.converter.jaxp.XmlConverter;
 import org.apache.camel.impl.DefaultConsumer;
 import org.apache.camel.impl.DefaultExchange;
 import org.springframework.ws.WebServiceMessage;
@@ -38,7 +37,6 @@ import org.springframework.ws.server.endpoint.MessageEndpoint;
 import org.springframework.ws.soap.SoapHeader;
 import org.springframework.ws.soap.SoapHeaderElement;
 import org.springframework.ws.soap.SoapMessage;
-import org.springframework.xml.transform.TransformerObjectSupport;
 
 public class SpringWebserviceConsumer extends DefaultConsumer implements MessageEndpoint {
 	
@@ -67,8 +65,8 @@ public class SpringWebserviceConsumer extends DefaultConsumer implements Message
 			if (responseMessage != null) {
 				Source responseBody = responseMessage.getBody(Source.class);
 				WebServiceMessage response = messageContext.getResponse();
-				TransformerSupportDelegate transformerSupportDelegate = new TransformerSupportDelegate();
-				transformerSupportDelegate.transformSourceToResult(responseBody, response.getPayloadResult());
+				XmlConverter xmlConverter = configuration.getXmlConverter();
+				xmlConverter.toResult(responseBody, response.getPayloadResult());
 			}
 		}
 	}
@@ -99,9 +97,9 @@ public class SpringWebserviceConsumer extends DefaultConsumer implements Message
 			SoapMessage soapMessage = (SoapMessage) request;
 			SoapHeader soapHeader = soapMessage.getSoapHeader();
 			if (soapHeader != null) {
-				Iterator<?> attributeIter = soapHeader.getAllAttributes();
-				while (attributeIter.hasNext()) {
-					QName name = (QName) attributeIter.next();
+				Iterator<?> attibutesIterator = soapHeader.getAllAttributes();
+				while (attibutesIterator.hasNext()) {
+					QName name = (QName) attibutesIterator.next();
 					headers.put(name.toString(), soapHeader.getAttributeValue(name));
 				}
 				Iterator<?> elementIter = soapHeader.examineAllHeaderElements();
@@ -115,15 +113,6 @@ public class SpringWebserviceConsumer extends DefaultConsumer implements Message
 			}
 		}
 		return headers;
-	}
-	
-	/**
-	 * Transform webservice response {@link Source} object to {@link Result}
-	 */
-	private class TransformerSupportDelegate extends TransformerObjectSupport {
-		void transformSourceToResult(Source source, Result result) throws TransformerException {
-			this.transform(source, result);
-		}
 	}
 
 	@Override

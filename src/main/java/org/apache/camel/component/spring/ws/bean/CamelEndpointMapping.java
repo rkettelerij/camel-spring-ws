@@ -16,20 +16,22 @@
  */
 package org.apache.camel.component.spring.ws.bean;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.namespace.QName;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMResult;
 
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.component.spring.ws.type.EndpointMappingKey;
 import org.apache.camel.component.spring.ws.type.EndpointMappingType;
+import org.apache.camel.converter.jaxp.XmlConverter;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.StringUtils;
 import org.springframework.ws.context.MessageContext;
 import org.springframework.ws.server.EndpointInterceptor;
@@ -44,7 +46,8 @@ import org.springframework.ws.transport.WebServiceConnection;
 import org.springframework.ws.transport.context.TransportContext;
 import org.springframework.ws.transport.context.TransportContextHolder;
 import org.springframework.xml.xpath.XPathExpression;
-import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 /**
  * Spring {@link EndpointMapping} for mapping messages to corresponding Camel endpoints. 
@@ -74,11 +77,12 @@ import org.w3c.dom.Element;
  * @author Richard Kettelerij
  * 
  */
-public class CamelEndpointMapping extends AbstractEndpointMapping {
+public class CamelEndpointMapping extends AbstractEndpointMapping implements InitializingBean {
 	
 	private static final String DOUBLE_QUOTE = "\"";
 	private Map<EndpointMappingKey, MessageEndpoint> endpoints = new ConcurrentHashMap<EndpointMappingKey, MessageEndpoint>();
-    private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+    private TransformerFactory transformerFactory;
+    private XmlConverter xmlConverter;
 
 	@Override
 	protected Object getEndpointInternal(MessageContext messageContext) throws Exception {
@@ -86,17 +90,13 @@ public class CamelEndpointMapping extends AbstractEndpointMapping {
 			Object messageKey = null;
 			switch (key.getType()) {
 				case ROOT_QNAME : 
-					messageKey = getRootQName(messageContext); 
-					break;
+					messageKey = getRootQName(messageContext); break;
 				case SOAP_ACTION : 
-					messageKey = getSoapAction(messageContext); 
-					break;
+					messageKey = getSoapAction(messageContext); break;
 				case XPATHRESULT :
-					messageKey = getXPathResult(messageContext, key.getExpression());
-					break;
+					messageKey = getXPathResult(messageContext, key.getExpression()); break;
 				case URI : 
-					messageKey = getUri(); 
-					break;
+					messageKey = getUri(); break;
 				default : 
 					throw new RuntimeCamelException("Invalid mapping type specified. Supported types are: root QName, SOAP action, XPath expression and URI");
 			}
@@ -121,9 +121,6 @@ public class CamelEndpointMapping extends AbstractEndpointMapping {
         return super.createEndpointInvocationChain(messageContext, endpoint, interceptors);
     }
 
-    /**
-     * Roughly equivalent to {@link org.springframework.ws.soap.server.endpoint.mapping.SoapActionEndpointMapping#getEndpoint(MessageContext)}
-     */
 	private String getSoapAction(MessageContext messageContext) {
 		if (messageContext.getRequest() instanceof SoapMessage) {
             SoapMessage request = (SoapMessage) messageContext.getRequest();
@@ -136,9 +133,6 @@ public class CamelEndpointMapping extends AbstractEndpointMapping {
         return null;
 	}
 
-    /**
-     * Roughly equivalent to {@link org.springframework.ws.server.endpoint.mapping.UriEndpointMapping#getEndpoint(MessageContext)}
-     */
 	private String getUri() throws URISyntaxException {
 		TransportContext transportContext = TransportContextHolder.getTransportContext();
         if (transportContext != null) {
@@ -150,24 +144,17 @@ public class CamelEndpointMapping extends AbstractEndpointMapping {
         return null;
 	}
 
-    /**
-     * Roughly equivalent to {@link org.springframework.ws.server.endpoint.mapping.PayloadRootQNameEndpointMapping#getEndpoint(MessageContext)}
-     */
 	private String getRootQName(MessageContext messageContext) throws TransformerException, XMLStreamException {
 		QName qName = PayloadRootUtils.getPayloadRootQName(messageContext.getRequest().getPayloadSource(), transformerFactory);
 		return qName != null ? qName.toString() : null;
 	}
 
-    /**
-     * Roughly equivalent to {@link org.springframework.ws.server.endpoint.mapping.XPathPayloadEndpointMapping#getEndpoint(MessageContext)}
-     */
-	private String getXPathResult(MessageContext messageContext, XPathExpression expression) throws TransformerException, XMLStreamException {
+	private String getXPathResult(MessageContext messageContext, XPathExpression expression) throws TransformerException, XMLStreamException, ParserConfigurationException, IOException, SAXException {
 		if (expression != null) {
-	        Transformer transformer = transformerFactory.newTransformer();
-	        DOMResult domResult = new DOMResult();
-	        transformer.transform(messageContext.getRequest().getPayloadSource(), domResult);
-	        Element elm = (Element) domResult.getNode().getFirstChild();
-	        return expression.evaluateAsString(elm); 
+			Node domNode = xmlConverter.toDOMNode(messageContext.getRequest().getPayloadSource());
+			if (domNode != null) {
+		        return expression.evaluateAsString(domNode.getFirstChild()); 				
+			}
 		}
 		return null;
 	}
@@ -187,5 +174,30 @@ public class CamelEndpointMapping extends AbstractEndpointMapping {
 	 */
 	public void removeConsumer(Object key) {
 		endpoints.remove(key);
+	}
+
+	/**
+	 * Gets the configured TransformerFactory
+	 * @return instance of TransformerFactory
+	 */
+	public TransformerFactory getTransformerFactory() {
+		return transformerFactory;
+	}
+
+	/**
+	 * Optional setter to override default TransformerFactory
+	 * @param transformerFactory non-default TransformerFactory
+	 */
+	public void setTransformerFactory(TransformerFactory transformerFactory) {
+		this.transformerFactory = transformerFactory;
+	}
+
+	public void afterPropertiesSet() throws Exception {
+		xmlConverter = new XmlConverter();
+		if (transformerFactory != null) {
+			xmlConverter.setTransformerFactory(transformerFactory);
+		} else {
+			transformerFactory = TransformerFactory.newInstance();
+		}
 	}
 }

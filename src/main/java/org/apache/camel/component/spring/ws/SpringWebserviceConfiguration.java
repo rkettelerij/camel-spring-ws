@@ -22,6 +22,7 @@ import java.net.URISyntaxException;
 import org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher;
 import org.apache.camel.component.spring.ws.bean.CamelEndpointMapping;
 import org.apache.camel.component.spring.ws.type.EndpointMappingKey;
+import org.apache.camel.converter.jaxp.XmlConverter;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
 public class SpringWebserviceConfiguration {
@@ -35,6 +36,8 @@ public class SpringWebserviceConfiguration {
 	private CamelEndpointMapping endpointMapping;
 	private CamelEndpointDispatcher endpointDispatcher;
 	private EndpointMappingKey endpointMappingKey;
+	
+	private XmlConverter xmlConverter;
 
 	public WebServiceTemplate getWebServiceTemplate() {
 		return webServiceTemplate;
@@ -96,5 +99,13 @@ public class SpringWebserviceConfiguration {
 
 	public void setEndpointDispatcher(CamelEndpointDispatcher endpointDispatcher) {
 		this.endpointDispatcher = endpointDispatcher;
+	}
+
+	public XmlConverter getXmlConverter() {
+		return xmlConverter;
+	}
+
+	public void setXmlConverter(XmlConverter xmlConverter) {
+		this.xmlConverter = xmlConverter;
 	}
 }
