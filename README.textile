@@ -53,9 +53,7 @@ The following options can be specified in the registry (most likely a Spring App
 | @messageFactory@ | No | Option to provide a custom "WebServiceMessageFactory":http://static.springsource.org/spring-ws/sites/1.5/apidocs/org/springframework/ws/WebServiceMessageFactory.html. For example when you want Apache Axiom to handle web service messages instead of SAAJ |
 | @transformerFactory@ | No | Option to override default TransformerFactory. The provided transformer factory must be of type @javax.xml.transform.TransformerFactory@ |
 | @endpointMapping@ | Only when _mapping-type_ is @rootqname@, @soapaction@, @uri@ or @xpathresult@ | Reference to @org.apache.camel.component.spring.ws.bean.CamelEndpointMapping@ in the Registry/ApplicationContext. Only one bean is required in the registry to serve all Camel/Spring-WS endpoints. This bean is auto-discovered by the "MessageDispatcher":http://static.springsource.org/spring-ws/sites/1.5/apidocs/org/springframework/ws/server/MessageDispatcher.html and used to map requests to Camel endpoints based on characteristics specified on the endpoint (like root QName, SOAP action, etc) |
-| @endpointDispatcher@ | Only when _mapping-type_ is @beanname@ | Reference to @org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher@ in the Registry/ApplicationContext. For every endpoint with mapping-type @beanname@ one bean with a corresponding name is required in the registry. This bean acts as a bridge between the Camel endpoint and an existing "endpoint mapping":http://static.springsource.org/spring-ws/sites/1.5/reference/html/server.html#server-endpoint-mapping |
 
-Note that the use of @endpointDispatcher@ and the @beanname@ mapping-type is primarily meant for (legacy) situations where you're already using Spring-WS and have endpoint mappings defined in a Spring XML file. The @beanname@ mapping-type allows you to wire your Camel route into an existing endpoint mapping. When you're starting from scratch it's recommended to define your endpoint mappings as Camel URI's (illustrated below with @endpointMapping@) since it requires less configuration and is more expressive. Alternatively you could use vanilla Spring-WS with the help of annotations. 
 
 h2. Message headers
 
@@ -87,7 +85,7 @@ from("direct:example")
 
 Optionally you can override the endpoint options with header values:
 <code>
-template.requestBodyAndHeader("direct:example", "<foobar xmlns=\"http://foo.com\"><msg>test message</msg></foobar>", "CamelSpringWebserviceSoapAction", "http://baz.com");
+template.requestBodyAndHeader("direct:example", "<foobar xmlns=\"http://foo.com\"><msg>test message</msg></foobar>", SpringWebserviceConstants.SPRING_WS_SOAP_ACTION, "http://baz.com");
 </code>
 
 h3. Using a custom MessageSender and MessageFactory
@@ -121,7 +119,7 @@ Spring configuration:
 
 h3. POJO (un)marshalling
 
-Camel's pluggable data format's offer support for pojo/xml marshalling using JAXB, XStream, Castor and XMLBeans. You can use these data format's in your route to sent and receive pojo's to and from web services.
+Camel's pluggable data formats offer support for pojo/xml marshalling using JAXB, XStream, Castor and XMLBeans. You can use these data formats in your route to sent and receive pojo's to and from web services.
 
 <pre>
 JaxbDataFormat jaxb = new JaxbDataFormat(false);
@@ -194,7 +192,7 @@ from("springws:soapaction:http://example.com/GetFoo?endpointMapping=#endpointMap
 
 The following route will receive all requests sent to "http://example.com/foobar".
 <code>
-from("springws:uri:/foobar?endpointMapping=#endpointMapping")
+from("springws:uri:http://example.com/foobar?endpointMapping=#endpointMapping")
 .convertBodyTo(String.class).to(mock:example)
 </code>
 
@@ -203,3 +201,30 @@ The route below will receive requests that contain the element @<foobar>abc</foo
 from("springws:xpathresult:abc?expression=//foobar&endpointMapping=#endpointMapping")
 .convertBodyTo(String.class).to(mock:example)
 </code>
+
+h3. Using existing endpoint mappings
+
+The use of the @beanname@ mapping-type is primarily meant for (legacy) situations where you're already using Spring-WS and have endpoint mappings defined in a Spring XML file. The @beanname@ mapping-type allows you to wire your Camel route into an existing endpoint mapping. When you're starting from scratch it's recommended to define your endpoint mappings as Camel URI's (as illustrated above with @endpointMapping@) since it requires less configuration and is more expressive. Alternatively you could use vanilla Spring-WS with the help of annotations. 
+
+For every endpoint with mapping-type @beanname@ one bean of type @org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher@ with a corresponding name is required in the Registry/ApplicationContext. This bean acts as a bridge between the Camel endpoint and an existing "endpoint mapping":http://static.springsource.org/spring-ws/sites/1.5/reference/html/server.html#server-endpoint-mapping. 
+
+<pre>
+<camelContext xmlns="http://camel.apache.org/schema/spring">
+	<route>
+		<from uri="springws:beanname:QuoteEndpointDispatcher" />
+		<to uri="mock:example" />
+	</route>
+</camelContext>
+
+<bean id="legacyEndpointMapping" class="org.springframework.ws.server.endpoint.mapping.PayloadRootQNameEndpointMapping">
+    <property name="mappings">
+        <props>
+            <prop key="{http://example.com/}GetFuture">FutureEndpointDispatcher</prop>
+            <prop key="{http://example.com/}GetQuote">QuoteEndpointDispatcher</prop>
+        </props>
+    </property>
+</bean>
+
+<bean id="QuoteEndpointDispatcher" class="org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher" />
+<bean id="FutureEndpointDispatcher" class="org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher" />
+</pre>
