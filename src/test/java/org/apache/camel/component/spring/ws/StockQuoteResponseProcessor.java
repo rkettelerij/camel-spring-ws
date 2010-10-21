@@ -31,16 +31,16 @@ import org.w3c.dom.Document;
  * Generates static response on StockQuote webservice requests
  */
 public class StockQuoteResponseProcessor implements Processor {
-	
+
     private static final Log LOG = LogFactory.getLog(StockQuoteResponseProcessor.class);
 
-	public void process(Exchange exchange) throws Exception {
-		LOG.info("Crafting standard response in StockQuoteResponseProcessor");
-		File file = new File("src/test/resources/stockquote-response.xml");
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		DocumentBuilder db = dbf.newDocumentBuilder();
-		Document doc = db.parse(file);
-		exchange.getOut().setBody(doc);
-	}
+    public void process(Exchange exchange) throws Exception {
+        LOG.info("Crafting standard response in StockQuoteResponseProcessor");
+        File file = new File("src/test/resources/stockquote-response.xml");
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document doc = db.parse(file);
+        exchange.getOut().setBody(doc);
+    }
 
 }

@@ -20,12 +20,14 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 	http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
 
-	<bean id="endpointMapping" class="org.apache.camel.component.spring.ws.bean.CamelEndpointMapping" />
-	
+	<bean id="endpointMapping"
+		class="org.apache.camel.component.spring.ws.bean.CamelEndpointMapping" />
+
 	<bean id="webServiceTemplate" class="org.springframework.ws.client.core.WebServiceTemplate">
 		<property name="defaultUri" value="http://localhost" />
 		<property name="messageSender">
-			<bean class="net.javacrumbs.springws.test.helper.InMemoryWebServiceMessageSender" />
+			<bean
+				class="net.javacrumbs.springws.test.helper.InMemoryWebServiceMessageSender" />
 		</property>
 	</bean>
 

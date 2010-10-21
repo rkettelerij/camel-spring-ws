@@ -39,96 +39,97 @@ import org.springframework.ws.soap.SoapHeaderElement;
 import org.springframework.ws.soap.SoapMessage;
 
 public class SpringWebserviceConsumer extends DefaultConsumer implements MessageEndpoint {
-	
-	private SpringWebserviceEndpoint endpoint;
-	private SpringWebserviceConfiguration configuration;
 
-	public SpringWebserviceConsumer(Endpoint endpoint, Processor processor) {
-		super(endpoint, processor);
-		this.endpoint = (SpringWebserviceEndpoint) endpoint;
-		this.configuration = this.endpoint.getConfiguration();
-	}
+    private SpringWebserviceEndpoint endpoint;
+    private SpringWebserviceConfiguration configuration;
 
-	/**
-	 * Invoked by Spring-WS when a {@link WebServiceMessage} is received
-	 */
-	public void invoke(MessageContext messageContext) throws Exception {
-		Exchange exchange = new DefaultExchange(endpoint.getCamelContext(), ExchangePattern.InOptionalOut);
-		populateExchangeFromMessageContext(messageContext, exchange);
-		
-		// start message processing
-		getProcessor().process(exchange);
-		
-		// create webservice response from output body
-		if (exchange.getPattern().isOutCapable()) {
-			Message responseMessage = exchange.getOut(Message.class);
-			if (responseMessage != null) {
-				Source responseBody = responseMessage.getBody(Source.class);
-				WebServiceMessage response = messageContext.getResponse();
-				XmlConverter xmlConverter = configuration.getXmlConverter();
-				xmlConverter.toResult(responseBody, response.getPayloadResult());
-			}
-		}
-	}
+    public SpringWebserviceConsumer(Endpoint endpoint, Processor processor) {
+        super(endpoint, processor);
+        this.endpoint = (SpringWebserviceEndpoint) endpoint;
+        this.configuration = this.endpoint.getConfiguration();
+    }
 
-	private void populateExchangeFromMessageContext(MessageContext messageContext, Exchange exchange) {
-		populateExchangeWithPropertiesFromMessageContext(messageContext, exchange);
-		
-		// create inbound message
-		WebServiceMessage request = messageContext.getRequest();
-		SpringWebserviceMessage inMessage = new SpringWebserviceMessage(request);
-		inMessage.setHeaders(extractSoapHeadersFromWebServiceMessage(request));
-		exchange.setIn(inMessage);
-	}
+    /**
+     * Invoked by Spring-WS when a {@link WebServiceMessage} is received
+     */
+    public void invoke(MessageContext messageContext) throws Exception {
+        Exchange exchange = new DefaultExchange(endpoint.getCamelContext(), ExchangePattern.InOptionalOut);
+        populateExchangeFromMessageContext(messageContext, exchange);
 
-	private void populateExchangeWithPropertiesFromMessageContext(MessageContext messageContext, Exchange exchange) {
-		// convert WebserviceMessage properties (added through interceptors) to Camel exchange properties
-		String[] propertyNames = messageContext.getPropertyNames();
-		if (propertyNames != null) {
-			for (String propertyName : propertyNames) {
-				exchange.setProperty(propertyName, messageContext.getProperty(propertyName));
-			}
-		}
-	}
-	
-	private Map<String, Object> extractSoapHeadersFromWebServiceMessage(WebServiceMessage request) {
-		Map<String, Object> headers = new HashMap<String, Object>();
-		if (request instanceof SoapMessage) {
-			SoapMessage soapMessage = (SoapMessage) request;
-			SoapHeader soapHeader = soapMessage.getSoapHeader();
-			if (soapHeader != null) {
-				Iterator<?> attibutesIterator = soapHeader.getAllAttributes();
-				while (attibutesIterator.hasNext()) {
-					QName name = (QName) attibutesIterator.next();
-					headers.put(name.toString(), soapHeader.getAttributeValue(name));
-				}
-				Iterator<?> elementIter = soapHeader.examineAllHeaderElements();
-				while (elementIter.hasNext()) {
-					Object element = elementIter.next();
-					if (element instanceof SoapHeaderElement) {
-						QName name = ((SoapHeaderElement) element).getName();
-						headers.put(name.toString(), element);
-					}
-				}
-			}
-		}
-		return headers;
-	}
+        // start message processing
+        getProcessor().process(exchange);
 
-	@Override
-	protected void doStop() throws Exception {
-		if (configuration.getEndpointMapping() != null) {
-			configuration.getEndpointMapping().removeConsumer(configuration.getEndpointMappingKey());
-		}
-		super.doStop();
-	}
+        // create webservice response from output body
+        if (exchange.getPattern().isOutCapable()) {
+            Message responseMessage = exchange.getOut(Message.class);
+            if (responseMessage != null) {
+                Source responseBody = responseMessage.getBody(Source.class);
+                WebServiceMessage response = messageContext.getResponse();
+                XmlConverter xmlConverter = configuration.getXmlConverter();
+                xmlConverter.toResult(responseBody, response.getPayloadResult());
+            }
+        }
+    }
 
-	@Override
-	protected void doStart() throws Exception {
-		if (configuration.getEndpointMapping() != null) {
-			configuration.getEndpointMapping().addConsumer(configuration.getEndpointMappingKey(), this);
-		}
-		super.doStart();
-	}
+    private void populateExchangeFromMessageContext(MessageContext messageContext, Exchange exchange) {
+        populateExchangeWithPropertiesFromMessageContext(messageContext, exchange);
+
+        // create inbound message
+        WebServiceMessage request = messageContext.getRequest();
+        SpringWebserviceMessage inMessage = new SpringWebserviceMessage(request);
+        inMessage.setHeaders(extractSoapHeadersFromWebServiceMessage(request));
+        exchange.setIn(inMessage);
+    }
+
+    private void populateExchangeWithPropertiesFromMessageContext(MessageContext messageContext, Exchange exchange) {
+        // convert WebserviceMessage properties (added through interceptors) to
+        // Camel exchange properties
+        String[] propertyNames = messageContext.getPropertyNames();
+        if (propertyNames != null) {
+            for (String propertyName : propertyNames) {
+                exchange.setProperty(propertyName, messageContext.getProperty(propertyName));
+            }
+        }
+    }
+
+    private Map<String, Object> extractSoapHeadersFromWebServiceMessage(WebServiceMessage request) {
+        Map<String, Object> headers = new HashMap<String, Object>();
+        if (request instanceof SoapMessage) {
+            SoapMessage soapMessage = (SoapMessage) request;
+            SoapHeader soapHeader = soapMessage.getSoapHeader();
+            if (soapHeader != null) {
+                Iterator<?> attibutesIterator = soapHeader.getAllAttributes();
+                while (attibutesIterator.hasNext()) {
+                    QName name = (QName) attibutesIterator.next();
+                    headers.put(name.toString(), soapHeader.getAttributeValue(name));
+                }
+                Iterator<?> elementIter = soapHeader.examineAllHeaderElements();
+                while (elementIter.hasNext()) {
+                    Object element = elementIter.next();
+                    if (element instanceof SoapHeaderElement) {
+                        QName name = ((SoapHeaderElement) element).getName();
+                        headers.put(name.toString(), element);
+                    }
+                }
+            }
+        }
+        return headers;
+    }
+
+    @Override
+    protected void doStop() throws Exception {
+        if (configuration.getEndpointMapping() != null) {
+            configuration.getEndpointMapping().removeConsumer(configuration.getEndpointMappingKey());
+        }
+        super.doStop();
+    }
+
+    @Override
+    protected void doStart() throws Exception {
+        if (configuration.getEndpointMapping() != null) {
+            configuration.getEndpointMapping().addConsumer(configuration.getEndpointMappingKey(), this);
+        }
+        super.doStart();
+    }
 
 }

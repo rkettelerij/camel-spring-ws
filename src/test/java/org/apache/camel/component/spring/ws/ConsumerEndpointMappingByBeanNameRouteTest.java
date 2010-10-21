@@ -33,34 +33,35 @@ import org.springframework.ws.client.core.WebServiceTemplate;
 
 public class ConsumerEndpointMappingByBeanNameRouteTest extends CamelSpringTestSupport {
 
-	private static final String xmlRequestForGoogleStockQuote = "<GetQuote xmlns=\"http://www.stockquotes.edu/\"><symbol>GOOG</symbol></GetQuote>";
-	
-	private String expectedResponse;
-	private WebServiceTemplate webServiceTemplate;
-	
-	public ConsumerEndpointMappingByBeanNameRouteTest() throws IOException {
-		expectedResponse = FileUtil.readFileAsString("src/test/resources/stockquote-response.xml");
-	}
-	
-	@Before
-	public void setUp() throws Exception {
-		super.setUp();
-		webServiceTemplate = (WebServiceTemplate) applicationContext.getBean("webServiceTemplate");
-	}
-	
-	@Test
-	public void testBeanName() throws Exception {
-		StreamSource source = new StreamSource(new StringReader(xmlRequestForGoogleStockQuote));
-		StringWriter sw = new StringWriter();
-		StreamResult result = new StreamResult(sw);
-		webServiceTemplate.sendSourceAndReceiveToResult(source, result);
-		assertNotNull(result);
-		assertEquals(expectedResponse, sw.toString());
-	}
+    private static final String xmlRequestForGoogleStockQuote = "<GetQuote xmlns=\"http://www.stockquotes.edu/\"><symbol>GOOG</symbol></GetQuote>";
 
-	@Override
-	protected AbstractXmlApplicationContext createApplicationContext() {
-		return new ClassPathXmlApplicationContext("org/apache/camel/component/spring/ws/ConsumerEndpointMappingByBeanNameRouteTest-context.xml");
-	}
-	
+    private String expectedResponse;
+    private WebServiceTemplate webServiceTemplate;
+
+    public ConsumerEndpointMappingByBeanNameRouteTest() throws IOException {
+        expectedResponse = FileUtil.readFileAsString("src/test/resources/stockquote-response.xml");
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        webServiceTemplate = (WebServiceTemplate) applicationContext.getBean("webServiceTemplate");
+    }
+
+    @Test
+    public void testBeanName() throws Exception {
+        StreamSource source = new StreamSource(new StringReader(xmlRequestForGoogleStockQuote));
+        StringWriter sw = new StringWriter();
+        StreamResult result = new StreamResult(sw);
+        webServiceTemplate.sendSourceAndReceiveToResult(source, result);
+        assertNotNull(result);
+        assertEquals(expectedResponse, sw.toString());
+    }
+
+    @Override
+    protected AbstractXmlApplicationContext createApplicationContext() {
+        return new ClassPathXmlApplicationContext(
+                "org/apache/camel/component/spring/ws/ConsumerEndpointMappingByBeanNameRouteTest-context.xml");
+    }
+
 }

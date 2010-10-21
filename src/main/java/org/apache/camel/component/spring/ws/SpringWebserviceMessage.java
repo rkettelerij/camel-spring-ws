@@ -20,31 +20,31 @@ import org.apache.camel.impl.DefaultMessage;
 import org.springframework.ws.WebServiceMessage;
 
 public class SpringWebserviceMessage extends DefaultMessage {
-	private WebServiceMessage webServiceMessage;
-	
-	public SpringWebserviceMessage(WebServiceMessage webServiceMessage) {
-		super();
-		this.webServiceMessage = webServiceMessage;
-	}
-	
+    private WebServiceMessage webServiceMessage;
+
+    public SpringWebserviceMessage(WebServiceMessage webServiceMessage) {
+        super();
+        this.webServiceMessage = webServiceMessage;
+    }
+
     @Override
     protected Object createBody() {
         if (webServiceMessage != null) {
-        	webServiceMessage.getPayloadSource();
+            webServiceMessage.getPayloadSource();
         }
         return null;
     }
 
-	public WebServiceMessage getWebServiceMessage() {
-		return webServiceMessage;
-	}
+    public WebServiceMessage getWebServiceMessage() {
+        return webServiceMessage;
+    }
 
-	public void setWebServiceMessage(WebServiceMessage webServiceMessage) {
-		this.webServiceMessage = webServiceMessage;
-	}
+    public void setWebServiceMessage(WebServiceMessage webServiceMessage) {
+        this.webServiceMessage = webServiceMessage;
+    }
 
-	@Override
-	public String toString() {
-		return "SpringWebserviceMessage [webServiceMessage=" + webServiceMessage + "]";
-	}
+    @Override
+    public String toString() {
+        return "SpringWebserviceMessage [webServiceMessage=" + webServiceMessage + "]";
+    }
 }

@@ -41,18 +41,18 @@ import org.springframework.ws.server.endpoint.mapping.AbstractMapBasedEndpointMa
  */
 public class CamelEndpointDispatcher implements MessageEndpoint {
 
-	private MessageEndpoint consumerMessageEndpoint;
+    private MessageEndpoint consumerMessageEndpoint;
 
-	public void invoke(MessageContext messageContext) throws Exception {
-		Assert.notNull(consumerMessageEndpoint);
-		consumerMessageEndpoint.invoke(messageContext);
-	}
+    public void invoke(MessageContext messageContext) throws Exception {
+        Assert.notNull(consumerMessageEndpoint);
+        consumerMessageEndpoint.invoke(messageContext);
+    }
 
-	public MessageEndpoint getConsumerMessageEndpoint() {
-		return consumerMessageEndpoint;
-	}
+    public MessageEndpoint getConsumerMessageEndpoint() {
+        return consumerMessageEndpoint;
+    }
 
-	public void setConsumerMessageEndpoint(MessageEndpoint consumer) {
-		this.consumerMessageEndpoint = consumer;
-	}
+    public void setConsumerMessageEndpoint(MessageEndpoint consumer) {
+        this.consumerMessageEndpoint = consumer;
+    }
 }

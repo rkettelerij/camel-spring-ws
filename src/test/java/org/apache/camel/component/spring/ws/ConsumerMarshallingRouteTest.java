@@ -33,77 +33,79 @@ import org.springframework.ws.client.core.WebServiceTemplate;
 @ContextConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ConsumerMarshallingRouteTest extends CamelTestSupport {
-	
+
     @Autowired
     private CamelEndpointMapping endpointMapping;
-    
+
     @Autowired
     private WebServiceTemplate webServiceTemplate;
-    
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
         context.setTracing(true);
-	}
-    
-	@Override
+    }
+
+    @Override
     protected JndiRegistry createRegistry() throws Exception {
         JndiRegistry registry = super.createRegistry();
         registry.bind("endpointMapping", this.endpointMapping);
         registry.bind("webServiceTemplate", this.webServiceTemplate);
         return registry;
     }
-	
-	@Test
-	public void consumeWebserviceWithPojoRequest() throws Exception {
-		QuoteRequest request = new QuoteRequest(); 
-		request.setSymbol("GOOG");
-		
-		Object result = template.requestBody("direct:webservice-marshall", request);
 
-		assertNotNull(result);
-		assertTrue(result instanceof String);
-		String resultMessage = (String) result;
-		assertTrue(resultMessage.contains("Google Inc."));
-	}
-	
-	@Test
-	public void consumeWebserviceWithPojoRequestAndPojoResponse() throws Exception {
-		QuoteRequest request = new QuoteRequest(); 
-		request.setSymbol("GOOG");
-		
-		Object result = template.requestBody("direct:webservice-marshall-unmarshall", request);
+    @Test
+    public void consumeWebserviceWithPojoRequest() throws Exception {
+        QuoteRequest request = new QuoteRequest();
+        request.setSymbol("GOOG");
 
-		assertNotNull(result);
-		assertTrue(result instanceof QuoteResponse);
-		QuoteResponse quoteResponse = (QuoteResponse) result;
-		assertEquals("Google Inc.", quoteResponse.getName());
-	}
-	
-	@Override
-	protected RouteBuilder createRouteBuilder() throws Exception {
-		return new RouteBuilder() {
-			
-			@Override
-			public void configure() throws Exception {
-				JaxbDataFormat jaxb = new JaxbDataFormat(false);
-				jaxb.setContextPath("org.apache.camel.component.spring.ws.jaxb");
-				
-				// request webservice
-				from("direct:webservice-marshall").marshal(jaxb)
-				.to("springws:http://localhost/?soapAction=http://www.stockquotes.edu/GetQuote&webServiceTemplate=#webServiceTemplate")
-				.convertBodyTo(String.class);
+        Object result = template.requestBody("direct:webservice-marshall", request);
 
-				// request webservice
-				from("direct:webservice-marshall-unmarshall").marshal(jaxb)
-				.to("springws:http://localhost/?soapAction=http://www.stockquotes.edu/GetQuote&webServiceTemplate=#webServiceTemplate")
-				.unmarshal(jaxb);
-				
-				// provide web service
-				from("springws:soapaction:http://www.stockquotes.edu/GetQuote?endpointMapping=#endpointMapping")
-				.process(new StockQuoteResponseProcessor());
-			}
-		};
-	}
+        assertNotNull(result);
+        assertTrue(result instanceof String);
+        String resultMessage = (String) result;
+        assertTrue(resultMessage.contains("Google Inc."));
+    }
+
+    @Test
+    public void consumeWebserviceWithPojoRequestAndPojoResponse() throws Exception {
+        QuoteRequest request = new QuoteRequest();
+        request.setSymbol("GOOG");
+
+        Object result = template.requestBody("direct:webservice-marshall-unmarshall", request);
+
+        assertNotNull(result);
+        assertTrue(result instanceof QuoteResponse);
+        QuoteResponse quoteResponse = (QuoteResponse) result;
+        assertEquals("Google Inc.", quoteResponse.getName());
+    }
+
+    @Override
+    protected RouteBuilder createRouteBuilder() throws Exception {
+        return new RouteBuilder() {
+
+            @Override
+            public void configure() throws Exception {
+                JaxbDataFormat jaxb = new JaxbDataFormat(false);
+                jaxb.setContextPath("org.apache.camel.component.spring.ws.jaxb");
+
+                // request webservice
+                from("direct:webservice-marshall")
+                        .marshal(jaxb)
+                        .to("springws:http://localhost/?soapAction=http://www.stockquotes.edu/GetQuote&webServiceTemplate=#webServiceTemplate")
+                        .convertBodyTo(String.class);
+
+                // request webservice
+                from("direct:webservice-marshall-unmarshall")
+                        .marshal(jaxb)
+                        .to("springws:http://localhost/?soapAction=http://www.stockquotes.edu/GetQuote&webServiceTemplate=#webServiceTemplate")
+                        .unmarshal(jaxb);
+
+                // provide web service
+                from("springws:soapaction:http://www.stockquotes.edu/GetQuote?endpointMapping=#endpointMapping").process(
+                        new StockQuoteResponseProcessor());
+            }
+        };
+    }
 
 }

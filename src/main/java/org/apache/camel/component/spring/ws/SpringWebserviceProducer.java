@@ -34,64 +34,66 @@ import org.springframework.ws.soap.client.core.SoapActionCallback;
 
 public class SpringWebserviceProducer extends DefaultProducer {
 
-	private SpringWebserviceEndpoint endpoint;
-	private static final SourceExtractor sourceExtractor = new NoopSourceExtractor();
+    private SpringWebserviceEndpoint endpoint;
+    private static final SourceExtractor sourceExtractor = new NoopSourceExtractor();
 
-	public SpringWebserviceProducer(Endpoint endpoint) {
-		super(endpoint);
-		this.endpoint = (SpringWebserviceEndpoint) endpoint;
-	}
+    public SpringWebserviceProducer(Endpoint endpoint) {
+        super(endpoint);
+        this.endpoint = (SpringWebserviceEndpoint) endpoint;
+    }
 
-	public void process(Exchange exchange) throws Exception {
-		// Let Camel TypeConverter hierarchy handle the conversion of XML messages to Source objects
-		Source sourcePayload = exchange.getIn().getMandatoryBody(Source.class);
-		
-		// Extract optional headers
-		String endpointUri = exchange.getIn().getHeader(SpringWebserviceConstants.SPRING_WS_ENDPOINT_URI, String.class);
-		String soapAction = exchange.getIn().getHeader(SpringWebserviceConstants.SPRING_WS_SOAP_ACTION, String.class);
-		URI wsAddressingAction = exchange.getIn().getHeader(SpringWebserviceConstants.SPRING_WS_ADDRESSING_ACTION, URI.class);
-		
-		WebServiceMessageCallback callback = new DefaultWebserviceMessageCallback(soapAction, wsAddressingAction);
-		Object body = null;
-		if (endpointUri != null) {
-			body = endpoint.getConfiguration().getWebServiceTemplate().sendSourceAndReceive(endpointUri, sourcePayload, callback, sourceExtractor);			
-		} else {
-			body = endpoint.getConfiguration().getWebServiceTemplate().sendSourceAndReceive(sourcePayload, callback, sourceExtractor);
-		}
-		exchange.getOut().setBody(body);
-	}
+    public void process(Exchange exchange) throws Exception {
+        // Let Camel TypeConverter hierarchy handle the conversion of XML messages to Source objects
+        Source sourcePayload = exchange.getIn().getMandatoryBody(Source.class);
 
-	protected class DefaultWebserviceMessageCallback implements WebServiceMessageCallback {
-		private String soapActionHeader;
-		private URI wsAddressingActionHeader;
-		
-		public DefaultWebserviceMessageCallback(String soapAction, URI wsAddressingAction) {
-			this.soapActionHeader = soapAction;
-			this.wsAddressingActionHeader = wsAddressingAction;
-		}
+        // Extract optional headers
+        String endpointUri = exchange.getIn().getHeader(SpringWebserviceConstants.SPRING_WS_ENDPOINT_URI, String.class);
+        String soapAction = exchange.getIn().getHeader(SpringWebserviceConstants.SPRING_WS_SOAP_ACTION, String.class);
+        URI wsAddressingAction = exchange.getIn().getHeader(SpringWebserviceConstants.SPRING_WS_ADDRESSING_ACTION, URI.class);
 
-		public void doWithMessage(WebServiceMessage message) throws IOException, TransformerException {
-			// Add SoapAction to webservice request. Note that exchange header takes precedence over endpoint option
-			String soapAction = soapActionHeader != null ? soapActionHeader : endpoint.getConfiguration().getSoapAction();
-			if (soapAction != null) {
-				new SoapActionCallback(soapAction).doWithMessage(message);
-			}
-			// Add WS-Addressing Action to webservice request (the WS-Addressing 'to' header will default to the URL of the connection). 
-			// Note that exchange header takes precedence over endpoint option
-			URI wsAddressingAction = wsAddressingActionHeader != null ? wsAddressingActionHeader : endpoint.getConfiguration().getWsAddressingAction();
-			if (wsAddressingAction != null) {
-				new ActionCallback(wsAddressingAction).doWithMessage(message);
-			}
-		}
-	}
+        WebServiceMessageCallback callback = new DefaultWebserviceMessageCallback(soapAction, wsAddressingAction);
+        Object body = null;
+        if (endpointUri != null) {
+            body = endpoint.getConfiguration().getWebServiceTemplate().sendSourceAndReceive(endpointUri, sourcePayload, callback, sourceExtractor);
+        } else {
+            body = endpoint.getConfiguration().getWebServiceTemplate().sendSourceAndReceive(sourcePayload, callback, sourceExtractor);
+        }
+        exchange.getOut().setBody(body);
+    }
 
-	/**
-	 * A {@link SourceExtractor} that performs no conversion, instead conversion
-	 * is handled by Camel's {@link TypeConverter} hierarchy.
-	 */
-	private static class NoopSourceExtractor implements SourceExtractor {
-		public Object extractData(Source source) throws IOException, TransformerException {
-			return source;
-		}
-	}
+    protected class DefaultWebserviceMessageCallback implements WebServiceMessageCallback {
+        private String soapActionHeader;
+        private URI wsAddressingActionHeader;
+
+        public DefaultWebserviceMessageCallback(String soapAction, URI wsAddressingAction) {
+            this.soapActionHeader = soapAction;
+            this.wsAddressingActionHeader = wsAddressingAction;
+        }
+
+        public void doWithMessage(WebServiceMessage message) throws IOException, TransformerException {
+            // Add SoapAction to webservice request. Note that exchange header
+            // takes precedence over endpoint option
+            String soapAction = soapActionHeader != null ? soapActionHeader : endpoint.getConfiguration().getSoapAction();
+            if (soapAction != null) {
+                new SoapActionCallback(soapAction).doWithMessage(message);
+            }
+            // Add WS-Addressing Action to webservice request (the WS-Addressing
+            // 'to' header will default to the URL of the connection).
+            // Note that exchange header takes precedence over endpoint option
+            URI wsAddressingAction = wsAddressingActionHeader != null ? wsAddressingActionHeader : endpoint.getConfiguration().getWsAddressingAction();
+            if (wsAddressingAction != null) {
+                new ActionCallback(wsAddressingAction).doWithMessage(message);
+            }
+        }
+    }
+
+    /**
+     * A {@link SourceExtractor} that performs no conversion, instead conversion
+     * is handled by Camel's {@link TypeConverter} hierarchy.
+     */
+    private static class NoopSourceExtractor implements SourceExtractor {
+        public Object extractData(Source source) throws IOException, TransformerException {
+            return source;
+        }
+    }
 }

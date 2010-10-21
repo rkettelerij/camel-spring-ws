@@ -50,5 +50,5 @@
 			<convertBodyTo type="java.lang.String" />
 		</route>
 	</camelContext>
-	
+
 </beans>

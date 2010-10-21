@@ -18,8 +18,8 @@ package org.apache.camel.component.spring.ws;
 
 public final class SpringWebserviceConstants {
 
-	/* Producer constants */
-	public static final String SPRING_WS_ENDPOINT_URI = "CamelSpringWebserviceEndpointUri";
-	public static final String SPRING_WS_SOAP_ACTION = "CamelSpringWebserviceSoapAction";
-	public static final String SPRING_WS_ADDRESSING_ACTION = "CamelSpringWebserviceAddressingAction";
+    /* Producer constants */
+    public static final String SPRING_WS_ENDPOINT_URI = "CamelSpringWebserviceEndpointUri";
+    public static final String SPRING_WS_SOAP_ACTION = "CamelSpringWebserviceSoapAction";
+    public static final String SPRING_WS_ADDRESSING_ACTION = "CamelSpringWebserviceAddressingAction";
 }

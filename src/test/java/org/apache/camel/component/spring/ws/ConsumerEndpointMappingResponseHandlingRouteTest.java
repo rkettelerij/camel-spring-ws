@@ -34,65 +34,66 @@ import org.springframework.ws.soap.client.core.SoapActionCallback;
 
 public class ConsumerEndpointMappingResponseHandlingRouteTest extends CamelSpringTestSupport {
 
-	private static final String xmlRequestForGoogleStockQuote = "<GetQuote xmlns=\"http://www.webserviceX.NET/\"><symbol>GOOG</symbol></GetQuote>";
-	private static final String xmlRequestForGoogleStockQuoteNoNamespace = "<GetQuote><symbol>GOOG</symbol></GetQuote>";
-	private static final String xmlRequestForGoogleStockQuoteNoNamespaceDifferentBody = "<GetQuote><symbol>GRABME</symbol></GetQuote>";
-	
-	private String expectedResponse;
-	private WebServiceTemplate webServiceTemplate;
-	
-	public ConsumerEndpointMappingResponseHandlingRouteTest() throws IOException {
-		expectedResponse = FileUtil.readFileAsString("src/test/resources/stockquote-response.xml");
-	}
-	
-	@Before
-	public void setUp() throws Exception {
-		super.setUp();
-		webServiceTemplate = (WebServiceTemplate) applicationContext.getBean("webServiceTemplate");
-	}
-	
-	@Test
-	public void testRootQName() throws Exception {
-		StreamSource source = new StreamSource(new StringReader(xmlRequestForGoogleStockQuote));
-		StringWriter sw = new StringWriter();
-		StreamResult result = new StreamResult(sw);
-		webServiceTemplate.sendSourceAndReceiveToResult(source, result);
-		assertNotNull(result);
-		assertEquals(expectedResponse, sw.toString());
-	}
-	
-	@Test
-	public void testSoapAction() throws Exception {
-		StreamSource source = new StreamSource(new StringReader(xmlRequestForGoogleStockQuoteNoNamespace));
-		StringWriter sw = new StringWriter();
-		StreamResult result = new StreamResult(sw);
-		webServiceTemplate.sendSourceAndReceiveToResult(source, new SoapActionCallback("http://www.webserviceX.NET/GetQuote"), result);
-		assertNotNull(result);
-		assertEquals(expectedResponse, sw.toString());
-	}
-	
-	@Test
-	public void testUri() throws Exception {
-		StreamSource source = new StreamSource(new StringReader(xmlRequestForGoogleStockQuoteNoNamespace));
-		StringWriter sw = new StringWriter();
-		StreamResult result = new StreamResult(sw);
-		webServiceTemplate.sendSourceAndReceiveToResult("http://localhost/stockquote2", source, result);
-		assertNotNull(result);
-		assertEquals(expectedResponse, sw.toString());
-	}
-	
-	@Test
-	public void testXPath() throws Exception {
-		StreamSource source = new StreamSource(new StringReader(xmlRequestForGoogleStockQuoteNoNamespaceDifferentBody));
-		StringWriter sw = new StringWriter();
-		StreamResult result = new StreamResult(sw);
-		webServiceTemplate.sendSourceAndReceiveToResult(source, result);
-		assertNotNull(result);
-		assertEquals(expectedResponse, sw.toString());
-	}
+    private static final String xmlRequestForGoogleStockQuote = "<GetQuote xmlns=\"http://www.webserviceX.NET/\"><symbol>GOOG</symbol></GetQuote>";
+    private static final String xmlRequestForGoogleStockQuoteNoNamespace = "<GetQuote><symbol>GOOG</symbol></GetQuote>";
+    private static final String xmlRequestForGoogleStockQuoteNoNamespaceDifferentBody = "<GetQuote><symbol>GRABME</symbol></GetQuote>";
 
-	@Override
-	protected AbstractXmlApplicationContext createApplicationContext() {
-		return new ClassPathXmlApplicationContext("org/apache/camel/component/spring/ws/ConsumerEndpointMappingResponseHandlingRouteTest-context.xml");
-	}
+    private String expectedResponse;
+    private WebServiceTemplate webServiceTemplate;
+
+    public ConsumerEndpointMappingResponseHandlingRouteTest() throws IOException {
+        expectedResponse = FileUtil.readFileAsString("src/test/resources/stockquote-response.xml");
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        webServiceTemplate = (WebServiceTemplate) applicationContext.getBean("webServiceTemplate");
+    }
+
+    @Test
+    public void testRootQName() throws Exception {
+        StreamSource source = new StreamSource(new StringReader(xmlRequestForGoogleStockQuote));
+        StringWriter sw = new StringWriter();
+        StreamResult result = new StreamResult(sw);
+        webServiceTemplate.sendSourceAndReceiveToResult(source, result);
+        assertNotNull(result);
+        assertEquals(expectedResponse, sw.toString());
+    }
+
+    @Test
+    public void testSoapAction() throws Exception {
+        StreamSource source = new StreamSource(new StringReader(xmlRequestForGoogleStockQuoteNoNamespace));
+        StringWriter sw = new StringWriter();
+        StreamResult result = new StreamResult(sw);
+        webServiceTemplate.sendSourceAndReceiveToResult(source, new SoapActionCallback("http://www.webserviceX.NET/GetQuote"), result);
+        assertNotNull(result);
+        assertEquals(expectedResponse, sw.toString());
+    }
+
+    @Test
+    public void testUri() throws Exception {
+        StreamSource source = new StreamSource(new StringReader(xmlRequestForGoogleStockQuoteNoNamespace));
+        StringWriter sw = new StringWriter();
+        StreamResult result = new StreamResult(sw);
+        webServiceTemplate.sendSourceAndReceiveToResult("http://localhost/stockquote2", source, result);
+        assertNotNull(result);
+        assertEquals(expectedResponse, sw.toString());
+    }
+
+    @Test
+    public void testXPath() throws Exception {
+        StreamSource source = new StreamSource(new StringReader(xmlRequestForGoogleStockQuoteNoNamespaceDifferentBody));
+        StringWriter sw = new StringWriter();
+        StreamResult result = new StreamResult(sw);
+        webServiceTemplate.sendSourceAndReceiveToResult(source, result);
+        assertNotNull(result);
+        assertEquals(expectedResponse, sw.toString());
+    }
+
+    @Override
+    protected AbstractXmlApplicationContext createApplicationContext() {
+        return new ClassPathXmlApplicationContext(
+                "org/apache/camel/component/spring/ws/ConsumerEndpointMappingResponseHandlingRouteTest-context.xml");
+    }
 }

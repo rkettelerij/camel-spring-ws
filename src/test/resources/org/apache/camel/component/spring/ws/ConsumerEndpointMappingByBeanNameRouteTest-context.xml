@@ -21,7 +21,7 @@
 	http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
 
 	<!-- ============================== -->
-	<!--          Camel routes          -->
+	<!-- Camel routes -->
 	<!-- ============================== -->
 	<camelContext xmlns="http://camel.apache.org/schema/spring">
 		<route>
@@ -29,31 +29,37 @@
 			<to uri="responseProcessor" />
 		</route>
 	</camelContext>
-	
-	<bean id="endpointMapping" class="org.apache.camel.component.spring.ws.bean.CamelEndpointMapping" />
-	
-	<bean id="regularEndpointMapping" class="org.springframework.ws.server.endpoint.mapping.PayloadRootQNameEndpointMapping">
-        <property name="mappings">
-            <props>
-                <prop key="{http://www.stockquotes.edu/}GetFuture">FutureEndpointDispatcher</prop>
-                <prop key="{http://www.stockquotes.edu/}GetQuote">QuoteEndpointDispatcher</prop>
-            </props>
-        </property>
-    </bean>
 
-	<bean id="QuoteEndpointDispatcher" class="org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher" />
-	
-	<bean id="FutureEndpointDispatcher" class="org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher" />
-	
-	<bean id="responseProcessor" class="org.apache.camel.component.spring.ws.StockQuoteResponseProcessor" />
-	
+	<bean id="endpointMapping"
+		class="org.apache.camel.component.spring.ws.bean.CamelEndpointMapping" />
+
+	<bean id="regularEndpointMapping"
+		class="org.springframework.ws.server.endpoint.mapping.PayloadRootQNameEndpointMapping">
+		<property name="mappings">
+			<props>
+				<prop key="{http://www.stockquotes.edu/}GetFuture">FutureEndpointDispatcher</prop>
+				<prop key="{http://www.stockquotes.edu/}GetQuote">QuoteEndpointDispatcher</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="QuoteEndpointDispatcher"
+		class="org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher" />
+
+	<bean id="FutureEndpointDispatcher"
+		class="org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher" />
+
+	<bean id="responseProcessor"
+		class="org.apache.camel.component.spring.ws.StockQuoteResponseProcessor" />
+
 	<!-- ============================== -->
-	<!--   Supporting Spring-WS beans   -->
+	<!-- Supporting Spring-WS beans -->
 	<!-- ============================== -->
 	<bean id="webServiceTemplate" class="org.springframework.ws.client.core.WebServiceTemplate">
 		<property name="defaultUri" value="http://localhost" />
 		<property name="messageSender">
-			<bean class="net.javacrumbs.springws.test.helper.InMemoryWebServiceMessageSender" />
+			<bean
+				class="net.javacrumbs.springws.test.helper.InMemoryWebServiceMessageSender" />
 		</property>
 	</bean>
 

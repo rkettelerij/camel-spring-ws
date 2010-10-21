@@ -78,51 +78,56 @@ import org.xml.sax.SAXException;
  * 
  */
 public class CamelEndpointMapping extends AbstractEndpointMapping implements InitializingBean {
-	
-	private static final String DOUBLE_QUOTE = "\"";
-	private Map<EndpointMappingKey, MessageEndpoint> endpoints = new ConcurrentHashMap<EndpointMappingKey, MessageEndpoint>();
+
+    private static final String DOUBLE_QUOTE = "\"";
+    private Map<EndpointMappingKey, MessageEndpoint> endpoints = new ConcurrentHashMap<EndpointMappingKey, MessageEndpoint>();
     private TransformerFactory transformerFactory;
     private XmlConverter xmlConverter;
 
-	@Override
-	protected Object getEndpointInternal(MessageContext messageContext) throws Exception {
-		for (EndpointMappingKey key : endpoints.keySet()) {
-			Object messageKey = null;
-			switch (key.getType()) {
-				case ROOT_QNAME : 
-					messageKey = getRootQName(messageContext); break;
-				case SOAP_ACTION : 
-					messageKey = getSoapAction(messageContext); break;
-				case XPATHRESULT :
-					messageKey = getXPathResult(messageContext, key.getExpression()); break;
-				case URI : 
-					messageKey = getUri(); break;
-				default : 
-					throw new RuntimeCamelException("Invalid mapping type specified. Supported types are: root QName, SOAP action, XPath expression and URI");
-			}
-			if (messageKey != null && key.getLookupKey().equals(messageKey)) {
-				return endpoints.get(key);
-			}
-		}        
-		return null;
-	}
-	
+    @Override
+    protected Object getEndpointInternal(MessageContext messageContext) throws Exception {
+        for (EndpointMappingKey key : endpoints.keySet()) {
+            Object messageKey = null;
+            switch (key.getType()) {
+                case ROOT_QNAME:
+                    messageKey = getRootQName(messageContext);
+                    break;
+                case SOAP_ACTION:
+                    messageKey = getSoapAction(messageContext);
+                    break;
+                case XPATHRESULT:
+                    messageKey = getXPathResult(messageContext, key.getExpression());
+                    break;
+                case URI:
+                    messageKey = getUri();
+                    break;
+                default:
+                    throw new RuntimeCamelException("Invalid mapping type specified. Supported types are: root QName, SOAP action, XPath expression and URI");
+            }
+            if (messageKey != null && key.getLookupKey().equals(messageKey)) {
+                return endpoints.get(key);
+            }
+        }
+        return null;
+    }
+
     @Override
     protected final EndpointInvocationChain createEndpointInvocationChain(MessageContext messageContext, Object endpoint, EndpointInterceptor[] interceptors) {
-    	for (EndpointMappingKey key : endpoints.keySet()) {
-    		if (EndpointMappingType.SOAP_ACTION.equals(key.getType())) {
-    			Object messageKey = getSoapAction(messageContext);
-    			if (messageKey != null && key.getLookupKey().equals(messageKey)) {
-    				return new SoapEndpointInvocationChain(endpoint, interceptors);
-    				// possibly add support for SOAP actors/roles and ultimate receiver in the future
-    			}
-    		}
-		}
+        for (EndpointMappingKey key : endpoints.keySet()) {
+            if (EndpointMappingType.SOAP_ACTION.equals(key.getType())) {
+                Object messageKey = getSoapAction(messageContext);
+                if (messageKey != null && key.getLookupKey().equals(messageKey)) {
+                    return new SoapEndpointInvocationChain(endpoint, interceptors);
+                    // possibly add support for SOAP actors/roles and ultimate
+                    // receiver in the future
+                }
+            }
+        }
         return super.createEndpointInvocationChain(messageContext, endpoint, interceptors);
     }
 
-	private String getSoapAction(MessageContext messageContext) {
-		if (messageContext.getRequest() instanceof SoapMessage) {
+    private String getSoapAction(MessageContext messageContext) {
+        if (messageContext.getRequest() instanceof SoapMessage) {
             SoapMessage request = (SoapMessage) messageContext.getRequest();
             String soapAction = request.getSoapAction();
             if (StringUtils.hasLength(soapAction) && soapAction.startsWith(DOUBLE_QUOTE) && soapAction.endsWith(DOUBLE_QUOTE)) {
@@ -131,10 +136,10 @@ public class CamelEndpointMapping extends AbstractEndpointMapping implements Ini
             return soapAction;
         }
         return null;
-	}
+    }
 
-	private String getUri() throws URISyntaxException {
-		TransportContext transportContext = TransportContextHolder.getTransportContext();
+    private String getUri() throws URISyntaxException {
+        TransportContext transportContext = TransportContextHolder.getTransportContext();
         if (transportContext != null) {
             WebServiceConnection webServiceConnection = transportContext.getConnection();
             if (webServiceConnection != null) {
@@ -142,62 +147,70 @@ public class CamelEndpointMapping extends AbstractEndpointMapping implements Ini
             }
         }
         return null;
-	}
+    }
 
-	private String getRootQName(MessageContext messageContext) throws TransformerException, XMLStreamException {
-		QName qName = PayloadRootUtils.getPayloadRootQName(messageContext.getRequest().getPayloadSource(), transformerFactory);
-		return qName != null ? qName.toString() : null;
-	}
+    private String getRootQName(MessageContext messageContext) throws TransformerException, XMLStreamException {
+        QName qName = PayloadRootUtils.getPayloadRootQName(messageContext.getRequest().getPayloadSource(), transformerFactory);
+        return qName != null ? qName.toString() : null;
+    }
 
-	private String getXPathResult(MessageContext messageContext, XPathExpression expression) throws TransformerException, XMLStreamException, ParserConfigurationException, IOException, SAXException {
-		if (expression != null) {
-			Node domNode = xmlConverter.toDOMNode(messageContext.getRequest().getPayloadSource());
-			if (domNode != null) {
-		        return expression.evaluateAsString(domNode.getFirstChild()); 				
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Used by Camel Spring Web Services endpoint to register consumers
-	 * @param key unique consumer key
-	 * @param endpoint consumer
-	 */
-	public void addConsumer(EndpointMappingKey key, MessageEndpoint endpoint) {
-		endpoints.put(key, endpoint);
-	}
-	
-	/**
-	 * Used by Camel Spring Web Services endpoint to unregister consumers
-	 * @param key unique consumer key
-	 */
-	public void removeConsumer(Object key) {
-		endpoints.remove(key);
-	}
+    private String getXPathResult(MessageContext messageContext, XPathExpression expression) throws TransformerException, XMLStreamException, ParserConfigurationException, IOException, SAXException {
+        if (expression != null) {
+            Node domNode = xmlConverter.toDOMNode(messageContext.getRequest().getPayloadSource());
+            if (domNode != null) {
+                return expression.evaluateAsString(domNode.getFirstChild());
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * Gets the configured TransformerFactory
-	 * @return instance of TransformerFactory
-	 */
-	public TransformerFactory getTransformerFactory() {
-		return transformerFactory;
-	}
+    /**
+     * Used by Camel Spring Web Services endpoint to register consumers
+     * 
+     * @param key
+     *            unique consumer key
+     * @param endpoint
+     *            consumer
+     */
+    public void addConsumer(EndpointMappingKey key, MessageEndpoint endpoint) {
+        endpoints.put(key, endpoint);
+    }
 
-	/**
-	 * Optional setter to override default TransformerFactory
-	 * @param transformerFactory non-default TransformerFactory
-	 */
-	public void setTransformerFactory(TransformerFactory transformerFactory) {
-		this.transformerFactory = transformerFactory;
-	}
+    /**
+     * Used by Camel Spring Web Services endpoint to unregister consumers
+     * 
+     * @param key
+     *            unique consumer key
+     */
+    public void removeConsumer(Object key) {
+        endpoints.remove(key);
+    }
 
-	public void afterPropertiesSet() throws Exception {
-		xmlConverter = new XmlConverter();
-		if (transformerFactory != null) {
-			xmlConverter.setTransformerFactory(transformerFactory);
-		} else {
-			transformerFactory = TransformerFactory.newInstance();
-		}
-	}
+    /**
+     * Gets the configured TransformerFactory
+     * 
+     * @return instance of TransformerFactory
+     */
+    public TransformerFactory getTransformerFactory() {
+        return transformerFactory;
+    }
+
+    /**
+     * Optional setter to override default TransformerFactory
+     * 
+     * @param transformerFactory
+     *            non-default TransformerFactory
+     */
+    public void setTransformerFactory(TransformerFactory transformerFactory) {
+        this.transformerFactory = transformerFactory;
+    }
+
+    public void afterPropertiesSet() throws Exception {
+        xmlConverter = new XmlConverter();
+        if (transformerFactory != null) {
+            xmlConverter.setTransformerFactory(transformerFactory);
+        } else {
+            transformerFactory = TransformerFactory.newInstance();
+        }
+    }
 }

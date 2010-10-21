@@ -31,65 +31,63 @@ import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 @ContextConfiguration
 public class ProducerLocalRouteTest extends AbstractJUnit4SpringContextTests {
 
-	private static final String stockQuoteWebserviceUri = "http://localhost/";
+    private static final String stockQuoteWebserviceUri = "http://localhost/";
 
-	private static final String xmlRequestForGoogleStockQuote =
-		"<GetQuote xmlns=\"http://www.webserviceX.NET/\"><symbol>GOOG</symbol></GetQuote>";
-	
+    private static final String xmlRequestForGoogleStockQuote = "<GetQuote xmlns=\"http://www.webserviceX.NET/\"><symbol>GOOG</symbol></GetQuote>";
+
     @Produce
     protected ProducerTemplate template;
-    
-	@Test()
-	public void consumeStockQuoteWebserviceWithDefaultTemplate() throws Exception {
-		Object result = template.requestBody("direct:stockQuoteWebserviceWithDefaultTemplate", xmlRequestForGoogleStockQuote);
-		
-		assertNotNull(result);
-		assertTrue(result instanceof Source);
-	}
 
-	@Test()
-	public void consumeStockQuoteWebservice() throws Exception {
-		Object result = template.requestBody("direct:stockQuoteWebservice", xmlRequestForGoogleStockQuote);
-		
-		assertNotNull(result);
-		assertTrue(result instanceof Source);
-	}
-	
-	@Test()
-	public void consumeStockQuoteWebserviceWithCamelStringSourceInput() throws Exception {
-		Object result = template.requestBody("direct:stockQuoteWebservice", new StringSource(xmlRequestForGoogleStockQuote));
-		
-		assertNotNull(result);
-		assertTrue(result instanceof Source);
-	}
-	
-	@Test()
-	public void consumeStockQuoteWebserviceWithNonDefaultMessageFactory() throws Exception {
-		Object result = template.requestBody("direct:stockQuoteWebserviceWithNonDefaultMessageFactory", xmlRequestForGoogleStockQuote);
-		
-		assertNotNull(result);
-		assertTrue(result instanceof Source);
-	}
-	
-	@Test()
-	public void consumeStockQuoteWebserviceAndConvertResult() throws Exception {
-		Object result = template.requestBody("direct:stockQuoteWebserviceAsString", xmlRequestForGoogleStockQuote);
-		
-		assertNotNull(result);
-		assertTrue(result instanceof String);
-		String resultMessage = (String) result;
-		assertTrue(resultMessage.contains("Google Inc."));
-	}
-	
-	@Test()
-	public void consumeStockQuoteWebserviceAndProvideEndpointUriByHeader() throws Exception {
-		Object result = template.requestBodyAndHeader("direct:stockQuoteWebserviceWithoutDefaultUri", xmlRequestForGoogleStockQuote, 
-				SpringWebserviceConstants.SPRING_WS_ENDPOINT_URI, stockQuoteWebserviceUri);
-		
-		assertNotNull(result);
-		assertTrue(result instanceof String);
-		String resultMessage = (String) result;
-		assertTrue(resultMessage.contains("Google Inc."));
-	}
+    @Test()
+    public void consumeStockQuoteWebserviceWithDefaultTemplate() throws Exception {
+        Object result = template.requestBody("direct:stockQuoteWebserviceWithDefaultTemplate", xmlRequestForGoogleStockQuote);
+
+        assertNotNull(result);
+        assertTrue(result instanceof Source);
+    }
+
+    @Test()
+    public void consumeStockQuoteWebservice() throws Exception {
+        Object result = template.requestBody("direct:stockQuoteWebservice", xmlRequestForGoogleStockQuote);
+
+        assertNotNull(result);
+        assertTrue(result instanceof Source);
+    }
+
+    @Test()
+    public void consumeStockQuoteWebserviceWithCamelStringSourceInput() throws Exception {
+        Object result = template.requestBody("direct:stockQuoteWebservice", new StringSource(xmlRequestForGoogleStockQuote));
+
+        assertNotNull(result);
+        assertTrue(result instanceof Source);
+    }
+
+    @Test()
+    public void consumeStockQuoteWebserviceWithNonDefaultMessageFactory() throws Exception {
+        Object result = template.requestBody("direct:stockQuoteWebserviceWithNonDefaultMessageFactory", xmlRequestForGoogleStockQuote);
+
+        assertNotNull(result);
+        assertTrue(result instanceof Source);
+    }
+
+    @Test()
+    public void consumeStockQuoteWebserviceAndConvertResult() throws Exception {
+        Object result = template.requestBody("direct:stockQuoteWebserviceAsString", xmlRequestForGoogleStockQuote);
+
+        assertNotNull(result);
+        assertTrue(result instanceof String);
+        String resultMessage = (String) result;
+        assertTrue(resultMessage.contains("Google Inc."));
+    }
+
+    @Test()
+    public void consumeStockQuoteWebserviceAndProvideEndpointUriByHeader() throws Exception {
+        Object result = template.requestBodyAndHeader("direct:stockQuoteWebserviceWithoutDefaultUri", xmlRequestForGoogleStockQuote,
+                SpringWebserviceConstants.SPRING_WS_ENDPOINT_URI, stockQuoteWebserviceUri);
+
+        assertNotNull(result);
+        assertTrue(result instanceof String);
+        String resultMessage = (String) result;
+        assertTrue(resultMessage.contains("Google Inc."));
+    }
 }
- 

@@ -23,32 +23,32 @@ import org.apache.camel.Producer;
 import org.apache.camel.impl.DefaultEndpoint;
 
 public class SpringWebserviceEndpoint extends DefaultEndpoint {
-	
-	private SpringWebserviceConfiguration configuration;
-	
-	public SpringWebserviceEndpoint(Component component, SpringWebserviceConfiguration configuration) {
-		super(configuration.getEndpointUri(), component);
-		this.configuration = configuration;
-	}
 
-	public Consumer createConsumer(Processor processor) throws Exception {
-		SpringWebserviceConsumer consumer = new SpringWebserviceConsumer(this, processor);
-		if (configuration.getEndpointDispatcher() != null) {
-			configuration.getEndpointDispatcher().setConsumerMessageEndpoint(consumer);			
-		}
-		return consumer;
-	}
+    private SpringWebserviceConfiguration configuration;
 
-	public Producer createProducer() throws Exception {
-		return new SpringWebserviceProducer(this);
-	}
+    public SpringWebserviceEndpoint(Component component, SpringWebserviceConfiguration configuration) {
+        super(configuration.getEndpointUri(), component);
+        this.configuration = configuration;
+    }
 
-	public boolean isSingleton() {
-		return true;
-	}
+    public Consumer createConsumer(Processor processor) throws Exception {
+        SpringWebserviceConsumer consumer = new SpringWebserviceConsumer(this, processor);
+        if (configuration.getEndpointDispatcher() != null) {
+            configuration.getEndpointDispatcher().setConsumerMessageEndpoint(consumer);
+        }
+        return consumer;
+    }
 
-	public SpringWebserviceConfiguration getConfiguration() {
-		return configuration;
-	}
+    public Producer createProducer() throws Exception {
+        return new SpringWebserviceProducer(this);
+    }
+
+    public boolean isSingleton() {
+        return true;
+    }
+
+    public SpringWebserviceConfiguration getConfiguration() {
+        return configuration;
+    }
 
 }

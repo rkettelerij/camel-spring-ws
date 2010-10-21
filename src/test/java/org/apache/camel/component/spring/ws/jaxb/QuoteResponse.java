@@ -28,48 +28,48 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 public class QuoteResponse {
 
-	@XmlElement(name = "Symbol", required = true)
-	private String symbol;
+    @XmlElement(name = "Symbol", required = true)
+    private String symbol;
 
-	@XmlElement(name = "Date", required = true)
-	private String date;
+    @XmlElement(name = "Date", required = true)
+    private String date;
 
-	@XmlElement(name = "Time", required = true)
-	private String time;
+    @XmlElement(name = "Time", required = true)
+    private String time;
 
-	@XmlElement(name = "Name", required = true)
-	private String name;
+    @XmlElement(name = "Name", required = true)
+    private String name;
 
-	public String getSymbol() {
-		return symbol;
-	}
+    public String getSymbol() {
+        return symbol;
+    }
 
-	public void setSymbol(String symbol) {
-		this.symbol = symbol;
-	}
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
 
-	public String getDate() {
-		return date;
-	}
+    public String getDate() {
+        return date;
+    }
 
-	public void setDate(String date) {
-		this.date = date;
-	}
+    public void setDate(String date) {
+        this.date = date;
+    }
 
-	public String getTime() {
-		return time;
-	}
+    public String getTime() {
+        return time;
+    }
 
-	public void setTime(String time) {
-		this.time = time;
-	}
+    public void setTime(String time) {
+        this.time = time;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
 }

@@ -27,85 +27,85 @@ import org.springframework.ws.client.core.WebServiceTemplate;
 
 public class SpringWebserviceConfiguration {
 
-	/* Producer configuration */
-	private WebServiceTemplate webServiceTemplate;
-	private String soapAction;
-	private URI wsAddressingAction;
-	
-	/* Consumer configuration */
-	private CamelEndpointMapping endpointMapping;
-	private CamelEndpointDispatcher endpointDispatcher;
-	private EndpointMappingKey endpointMappingKey;
-	
-	private XmlConverter xmlConverter;
+    /* Producer configuration */
+    private WebServiceTemplate webServiceTemplate;
+    private String soapAction;
+    private URI wsAddressingAction;
 
-	public WebServiceTemplate getWebServiceTemplate() {
-		return webServiceTemplate;
-	}
+    /* Consumer configuration */
+    private CamelEndpointMapping endpointMapping;
+    private CamelEndpointDispatcher endpointDispatcher;
+    private EndpointMappingKey endpointMappingKey;
 
-	public void setWebServiceTemplate(WebServiceTemplate webServiceTemplate) {
-		this.webServiceTemplate = webServiceTemplate;
-	}
+    private XmlConverter xmlConverter;
 
-	public String getSoapAction() {
-		return soapAction;
-	}
+    public WebServiceTemplate getWebServiceTemplate() {
+        return webServiceTemplate;
+    }
 
-	public void setSoapAction(String soapAction) {
-		this.soapAction = soapAction;
-	}
-	
-	public String getEndpointUri() {
-		if (endpointMappingKey != null) {
-			// only for consumers, use lookup key as endpoint uri/key
-			return endpointMappingKey.getLookupKey();
-		} else if (webServiceTemplate != null) {
-			return webServiceTemplate.getDefaultUri();
-		}
-		return null;
-	}
+    public void setWebServiceTemplate(WebServiceTemplate webServiceTemplate) {
+        this.webServiceTemplate = webServiceTemplate;
+    }
 
-	public URI getWsAddressingAction() {
-		return wsAddressingAction;
-	}
+    public String getSoapAction() {
+        return soapAction;
+    }
 
-	public void setWsAddressingAction(URI wsAddressingAction) {
-		this.wsAddressingAction = wsAddressingAction;
-	}
+    public void setSoapAction(String soapAction) {
+        this.soapAction = soapAction;
+    }
 
-	public void setWsAddressingAction(String wsAddressingAction) throws URISyntaxException {
-		this.wsAddressingAction = new URI(wsAddressingAction);
-	}
+    public String getEndpointUri() {
+        if (endpointMappingKey != null) {
+            // only for consumers, use lookup key as endpoint uri/key
+            return endpointMappingKey.getLookupKey();
+        } else if (webServiceTemplate != null) {
+            return webServiceTemplate.getDefaultUri();
+        }
+        return null;
+    }
 
-	public CamelEndpointMapping getEndpointMapping() {
-		return endpointMapping;
-	}
+    public URI getWsAddressingAction() {
+        return wsAddressingAction;
+    }
 
-	public void setEndpointMapping(CamelEndpointMapping endpointMapping) {
-		this.endpointMapping = endpointMapping;
-	}
+    public void setWsAddressingAction(URI wsAddressingAction) {
+        this.wsAddressingAction = wsAddressingAction;
+    }
 
-	public EndpointMappingKey getEndpointMappingKey() {
-		return endpointMappingKey;
-	}
+    public void setWsAddressingAction(String wsAddressingAction) throws URISyntaxException {
+        this.wsAddressingAction = new URI(wsAddressingAction);
+    }
 
-	public void setEndpointMappingKey(EndpointMappingKey endpointMappingKey) {
-		this.endpointMappingKey = endpointMappingKey;
-	}
+    public CamelEndpointMapping getEndpointMapping() {
+        return endpointMapping;
+    }
 
-	public CamelEndpointDispatcher getEndpointDispatcher() {
-		return endpointDispatcher;
-	}
+    public void setEndpointMapping(CamelEndpointMapping endpointMapping) {
+        this.endpointMapping = endpointMapping;
+    }
 
-	public void setEndpointDispatcher(CamelEndpointDispatcher endpointDispatcher) {
-		this.endpointDispatcher = endpointDispatcher;
-	}
+    public EndpointMappingKey getEndpointMappingKey() {
+        return endpointMappingKey;
+    }
 
-	public XmlConverter getXmlConverter() {
-		return xmlConverter;
-	}
+    public void setEndpointMappingKey(EndpointMappingKey endpointMappingKey) {
+        this.endpointMappingKey = endpointMappingKey;
+    }
 
-	public void setXmlConverter(XmlConverter xmlConverter) {
-		this.xmlConverter = xmlConverter;
-	}
+    public CamelEndpointDispatcher getEndpointDispatcher() {
+        return endpointDispatcher;
+    }
+
+    public void setEndpointDispatcher(CamelEndpointDispatcher endpointDispatcher) {
+        this.endpointDispatcher = endpointDispatcher;
+    }
+
+    public XmlConverter getXmlConverter() {
+        return xmlConverter;
+    }
+
+    public void setXmlConverter(XmlConverter xmlConverter) {
+        this.xmlConverter = xmlConverter;
+    }
 }

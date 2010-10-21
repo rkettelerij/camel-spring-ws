@@ -23,19 +23,19 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class FileUtil {
-	
-	public static String readFileAsString(String filePath) throws IOException {
-		char[] buffer = new char[(int) new File(filePath).length()];
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), "UTF-8"));
-			reader.read(buffer);
-		} finally {
-			if (reader != null) {
-				reader.close();
-			}
-		}
-		return new String(buffer);
-	}
-	
+
+    public static String readFileAsString(String filePath) throws IOException {
+        char[] buffer = new char[(int) new File(filePath).length()];
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), "UTF-8"));
+            reader.read(buffer);
+        } finally {
+            if (reader != null) {
+                reader.close();
+            }
+        }
+        return new String(buffer);
+    }
+
 }

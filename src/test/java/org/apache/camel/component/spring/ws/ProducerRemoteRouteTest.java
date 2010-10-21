@@ -32,71 +32,69 @@ import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 @ContextConfiguration
 public class ProducerRemoteRouteTest extends AbstractJUnit4SpringContextTests {
 
-	private static final String stockQuoteWebserviceUri = "http://www.webservicex.net/stockquote.asmx";
+    private static final String stockQuoteWebserviceUri = "http://www.webservicex.net/stockquote.asmx";
 
-	private static final String xmlRequestForGoogleStockQuote =
-		"<GetQuote xmlns=\"http://www.webserviceX.NET/\"><symbol>GOOG</symbol></GetQuote>";
-	
+    private static final String xmlRequestForGoogleStockQuote = "<GetQuote xmlns=\"http://www.webserviceX.NET/\"><symbol>GOOG</symbol></GetQuote>";
+
     @Produce
     protected ProducerTemplate template;
-    
-	@Ignore("Run manually, makes connection to external webservice")
-	@Test(timeout=5000)
-	public void consumeStockQuoteWebserviceWithDefaultTemplate() throws Exception {
-		Object result = template.requestBody("direct:stockQuoteWebserviceWithDefaultTemplate", xmlRequestForGoogleStockQuote);
-		
-		assertNotNull(result);
-		assertTrue(result instanceof Source);
-	}
 
-	@Ignore("Run manually, makes connection to external webservice")
-	@Test(timeout=5000)
-	public void consumeStockQuoteWebservice() throws Exception {
-		Object result = template.requestBody("direct:stockQuoteWebservice", xmlRequestForGoogleStockQuote);
-		
-		assertNotNull(result);
-		assertTrue(result instanceof Source);
-	}
-	
-	@Ignore("Run manually, makes connection to external webservice")
-	@Test(timeout=5000)
-	public void consumeStockQuoteWebserviceWithCamelStringSourceInput() throws Exception {
-		Object result = template.requestBody("direct:stockQuoteWebservice", new StringSource(xmlRequestForGoogleStockQuote));
-		
-		assertNotNull(result);
-		assertTrue(result instanceof Source);
-	}
-	
-	@Ignore("Run manually, makes connection to external webservice")
-	@Test(timeout=5000)
-	public void consumeStockQuoteWebserviceWithNonDefaultMessageFactory() throws Exception {
-		Object result = template.requestBody("direct:stockQuoteWebserviceWithNonDefaultMessageFactory", xmlRequestForGoogleStockQuote);
-		
-		assertNotNull(result);
-		assertTrue(result instanceof Source);
-	}
-	
-	@Ignore("Run manually, makes connection to external webservice")
-	@Test(timeout=5000)
-	public void consumeStockQuoteWebserviceAndConvertResult() throws Exception {
-		Object result = template.requestBody("direct:stockQuoteWebserviceAsString", xmlRequestForGoogleStockQuote);
-		
-		assertNotNull(result);
-		assertTrue(result instanceof String);
-		String resultMessage = (String) result;
-		assertTrue(resultMessage.contains("Google Inc."));
-	}
-	
-	@Ignore("Run manually, makes connection to external webservice")
-	@Test(timeout=5000)
-	public void consumeStockQuoteWebserviceAndProvideEndpointUriByHeader() throws Exception {
-		Object result = template.requestBodyAndHeader("direct:stockQuoteWebserviceWithoutDefaultUri", xmlRequestForGoogleStockQuote, 
-				SpringWebserviceConstants.SPRING_WS_ENDPOINT_URI, stockQuoteWebserviceUri);
-		
-		assertNotNull(result);
-		assertTrue(result instanceof String);
-		String resultMessage = (String) result;
-		assertTrue(resultMessage.contains("Google Inc."));
-	}
+    @Ignore("Run manually, makes connection to external webservice")
+    @Test(timeout = 5000)
+    public void consumeStockQuoteWebserviceWithDefaultTemplate() throws Exception {
+        Object result = template.requestBody("direct:stockQuoteWebserviceWithDefaultTemplate", xmlRequestForGoogleStockQuote);
+
+        assertNotNull(result);
+        assertTrue(result instanceof Source);
+    }
+
+    @Ignore("Run manually, makes connection to external webservice")
+    @Test(timeout = 5000)
+    public void consumeStockQuoteWebservice() throws Exception {
+        Object result = template.requestBody("direct:stockQuoteWebservice", xmlRequestForGoogleStockQuote);
+
+        assertNotNull(result);
+        assertTrue(result instanceof Source);
+    }
+
+    @Ignore("Run manually, makes connection to external webservice")
+    @Test(timeout = 5000)
+    public void consumeStockQuoteWebserviceWithCamelStringSourceInput() throws Exception {
+        Object result = template.requestBody("direct:stockQuoteWebservice", new StringSource(xmlRequestForGoogleStockQuote));
+
+        assertNotNull(result);
+        assertTrue(result instanceof Source);
+    }
+
+    @Ignore("Run manually, makes connection to external webservice")
+    @Test(timeout = 5000)
+    public void consumeStockQuoteWebserviceWithNonDefaultMessageFactory() throws Exception {
+        Object result = template.requestBody("direct:stockQuoteWebserviceWithNonDefaultMessageFactory", xmlRequestForGoogleStockQuote);
+
+        assertNotNull(result);
+        assertTrue(result instanceof Source);
+    }
+
+    @Ignore("Run manually, makes connection to external webservice")
+    @Test(timeout = 5000)
+    public void consumeStockQuoteWebserviceAndConvertResult() throws Exception {
+        Object result = template.requestBody("direct:stockQuoteWebserviceAsString", xmlRequestForGoogleStockQuote);
+
+        assertNotNull(result);
+        assertTrue(result instanceof String);
+        String resultMessage = (String) result;
+        assertTrue(resultMessage.contains("Google Inc."));
+    }
+
+    @Ignore("Run manually, makes connection to external webservice")
+    @Test(timeout = 5000)
+    public void consumeStockQuoteWebserviceAndProvideEndpointUriByHeader() throws Exception {
+        Object result = template.requestBodyAndHeader("direct:stockQuoteWebserviceWithoutDefaultUri", xmlRequestForGoogleStockQuote,
+                SpringWebserviceConstants.SPRING_WS_ENDPOINT_URI, stockQuoteWebserviceUri);
+
+        assertNotNull(result);
+        assertTrue(result instanceof String);
+        String resultMessage = (String) result;
+        assertTrue(resultMessage.contains("Google Inc."));
+    }
 }
- 

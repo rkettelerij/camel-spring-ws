@@ -29,13 +29,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class QuoteRequest {
 
     @XmlElement(required = true)
-	private String symbol;
+    private String symbol;
 
-	public String getSymbol() {
-		return symbol;
-	}
+    public String getSymbol() {
+        return symbol;
+    }
 
-	public void setSymbol(String symbol) {
-		this.symbol = symbol;
-	}
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
 }
