@@ -59,9 +59,6 @@ public class SpringWebserviceComponentProducerIntegrationTest extends CamelSprin
 	@EndpointInject(uri = "mock:testXPath")
     private MockEndpoint resultEndpointXPath;
 	
-	@EndpointInject(uri = "mock:testBeanName")
-    private MockEndpoint resultEndpointBeanName;
-	
 	private WebServiceTemplate webServiceTemplate;
 	
 	@Before
@@ -107,14 +104,6 @@ public class SpringWebserviceComponentProducerIntegrationTest extends CamelSprin
 		StreamSource source = new StreamSource(new StringReader(xmlRequestForGoogleStockQuoteNoNamespace));
 		webServiceTemplate.sendSourceAndReceive("http://localhost/wrong", source, noopSourceExtractor);
 		resultEndpointUri.assertIsNotSatisfied();
-	}
-	
-	@Test
-	public void testBeanName() throws Exception {
-		StreamSource source = new StreamSource(new StringReader(xmlRequestForGoogleStockQuote));
-		webServiceTemplate.sendSourceAndReceive("http://localhost/stockquote3", source, noopSourceExtractor);
-		resultEndpointBeanName.expectedMinimumMessageCount(1);
-		resultEndpointBeanName.assertIsSatisfied();
 	}
 
 	@Override

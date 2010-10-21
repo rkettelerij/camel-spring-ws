@@ -24,26 +24,9 @@
 			<from uri="springws:xpathresult:GRABME?expression=//GetQuote&amp;endpointMapping=#endpointMapping" />
 			<to uri="responseProcessor" />
 		</route>
-		<route>
-			<from uri="springws:beanname:QuoteEndpointDispatcher" />
-			<to uri="responseProcessor" />
-		</route>
 	</camelContext>
 	
 	<bean id="endpointMapping" class="org.apache.camel.component.spring.ws.bean.CamelEndpointMapping" />
-	
-	<bean id="regularEndpointMapping" class="org.springframework.ws.server.endpoint.mapping.PayloadRootQNameEndpointMapping">
-        <property name="mappings">
-            <props>
-                <prop key="{http://www.stockquotes.edu/}GetFuture">FutureEndpointDispatcher</prop>
-                <prop key="{http://www.stockquotes.edu/}GetQuote">QuoteEndpointDispatcher</prop>
-            </props>
-        </property>
-    </bean>
-
-	<bean id="QuoteEndpointDispatcher" class="org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher" />
-	
-	<bean id="FutureEndpointDispatcher" class="org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher" />
 	
 	<bean id="responseProcessor" class="org.apache.camel.component.spring.ws.StockQuoteResponseProcessor" />
 	

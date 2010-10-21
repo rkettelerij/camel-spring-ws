@@ -16,17 +16,14 @@
  */
 package org.apache.camel.component.spring.ws;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
 
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.camel.component.spring.ws.util.FileUtil;
 import org.apache.camel.test.junit4.CamelSpringTestSupport;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,13 +37,12 @@ public class SpringWebserviceComponentProducerResponseIntegrationTest extends Ca
 	private static final String xmlRequestForGoogleStockQuote = "<GetQuote xmlns=\"http://www.webserviceX.NET/\"><symbol>GOOG</symbol></GetQuote>";
 	private static final String xmlRequestForGoogleStockQuoteNoNamespace = "<GetQuote><symbol>GOOG</symbol></GetQuote>";
 	private static final String xmlRequestForGoogleStockQuoteNoNamespaceDifferentBody = "<GetQuote><symbol>GRABME</symbol></GetQuote>";
-	private static final String xmlRequestForGoogleStockQuoteNoNamespaceDifferentBody2 = "<GetQuote><symbol>FOO</symbol></GetQuote>";
 	
 	private String expectedResponse;
 	private WebServiceTemplate webServiceTemplate;
 	
 	public SpringWebserviceComponentProducerResponseIntegrationTest() throws IOException {
-		expectedResponse = readFileAsString("src/test/resources/stockquote-response.xml");
+		expectedResponse = FileUtil.readFileAsString("src/test/resources/stockquote-response.xml");
 	}
 	
 	@Before
@@ -94,33 +90,9 @@ public class SpringWebserviceComponentProducerResponseIntegrationTest extends Ca
 		assertNotNull(result);
 		assertEquals(expectedResponse, sw.toString());
 	}
-	
-	@Test
-	public void testBeanName() throws Exception {
-		StreamSource source = new StreamSource(new StringReader(xmlRequestForGoogleStockQuote));
-		StringWriter sw = new StringWriter();
-		StreamResult result = new StreamResult(sw);
-		webServiceTemplate.sendSourceAndReceiveToResult(source, result);
-		assertNotNull(result);
-		assertEquals(expectedResponse, sw.toString());
-	}
 
 	@Override
 	protected AbstractXmlApplicationContext createApplicationContext() {
 		return new ClassPathXmlApplicationContext("org/apache/camel/component/spring/ws/SpringWebserviceComponentProducerResponseIntegrationTest-context.xml");
-	}
-	
-	private String readFileAsString(String filePath) throws java.io.IOException{
-		char[] buffer = new char[(int) new File(filePath).length()];
-		BufferedReader f = null;
-		try {
-			f = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), "UTF-8"));
-			f.read(buffer);
-		} finally {
-			if (f != null) {
-				f.close();
-			}
-		}
-		return new String(buffer);
 	}
 }

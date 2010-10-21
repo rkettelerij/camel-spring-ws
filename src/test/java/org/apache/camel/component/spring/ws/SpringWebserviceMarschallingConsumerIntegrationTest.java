@@ -16,16 +16,47 @@
  */
 package org.apache.camel.component.spring.ws;
 
+import org.apache.camel.CamelExecutionException;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.spring.ws.bean.CamelEndpointMapping;
 import org.apache.camel.component.spring.ws.jaxb.QuoteRequest;
+import org.apache.camel.component.spring.ws.jaxb.QuoteResponse;
+import org.apache.camel.impl.JndiRegistry;
 import org.apache.camel.model.dataformat.JaxbDataFormat;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.ws.client.core.WebServiceTemplate;
 
+@ContextConfiguration
+@RunWith(SpringJUnit4ClassRunner.class)
 public class SpringWebserviceMarschallingConsumerIntegrationTest extends CamelTestSupport {
 	
+    @Autowired
+    private CamelEndpointMapping endpointMapping;
+    
+    @Autowired
+    private WebServiceTemplate webServiceTemplate;
+    
+	@Override
+	public void setUp() throws Exception {
+		super.setUp();
+        context.setTracing(true);
+	}
+    
+	@Override
+    protected JndiRegistry createRegistry() throws Exception {
+        JndiRegistry registry = super.createRegistry();
+        registry.bind("endpointMapping", this.endpointMapping);
+        registry.bind("webServiceTemplate", this.webServiceTemplate);
+        return registry;
+    }
+	
 	@Test
-	public void consumeStockQuoteWebservice() throws Exception {
+	public void consumeWebserviceWithPojoRequest() throws Exception {
 		QuoteRequest request = new QuoteRequest(); 
 		request.setSymbol("GOOG");
 		
@@ -37,6 +68,27 @@ public class SpringWebserviceMarschallingConsumerIntegrationTest extends CamelTe
 		assertTrue(resultMessage.contains("Google Inc."));
 	}
 	
+	@Test(expected=CamelExecutionException.class)
+	public void consumeWebserviceWithPojoRequestUsingWrongSoapAction() throws Exception {
+		QuoteRequest request = new QuoteRequest(); 
+		request.setSymbol("GOOG");
+
+		template.requestBody("direct:webservice-marshall-wrong-soapaction", request);
+	}
+	
+	@Test
+	public void consumeWebserviceWithPojoRequestAndPojoResponse() throws Exception {
+		QuoteRequest request = new QuoteRequest(); 
+		request.setSymbol("GOOG");
+		
+		Object result = template.requestBody("direct:webservice-marshall-unmarshall", request);
+
+		assertNotNull(result);
+		assertTrue(result instanceof QuoteResponse);
+		QuoteResponse quoteResponse = (QuoteResponse) result;
+		assertEquals("Google Inc.", quoteResponse.getName());
+	}
+	
 	@Override
 	protected RouteBuilder createRouteBuilder() throws Exception {
 		return new RouteBuilder() {
@@ -46,14 +98,25 @@ public class SpringWebserviceMarschallingConsumerIntegrationTest extends CamelTe
 				JaxbDataFormat jaxb = new JaxbDataFormat(false);
 				jaxb.setContextPath("org.apache.camel.component.spring.ws.jaxb");
 				
+				// request webservice
 				from("direct:webservice-marshall").marshal(jaxb)
-				.to("springws:http://www.webservicex.net/stockquote.asmx?soapAction=http://www.webserviceX.NET/GetQuote")
+				.to("springws:http://localhost/?soapAction=http://www.stockquotes.edu/GetQuote&webServiceTemplate=#webServiceTemplate")
 				.convertBodyTo(String.class);
 				
+				// request webservice
+				from("direct:webservice-marshall-wrong-soapaction").marshal(jaxb)
+				.to("springws:http://localhost/?soapAction=http://this-is-a-wrong-soap-action&webServiceTemplate=#webServiceTemplate");
+				
+				// request webservice
 				from("direct:webservice-marshall-unmarshall").marshal(jaxb)
-				.to("springws:http://127.0.0.1:8001/stockquote.asmx?soapAction=http://www.webserviceX.NET/GetQuote")
+				.to("springws:http://localhost/?soapAction=http://www.stockquotes.edu/GetQuote&webServiceTemplate=#webServiceTemplate")
 				.unmarshal(jaxb);
+				
+				// provide web service
+				from("springws:soapaction:http://www.stockquotes.edu/GetQuote?endpointMapping=#endpointMapping")
+				.process(new StockQuoteResponseProcessor());
 			}
 		};
 	}
+
 }
