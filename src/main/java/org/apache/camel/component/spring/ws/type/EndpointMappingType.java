@@ -18,6 +18,9 @@ package org.apache.camel.component.spring.ws.type;
 
 /**
  * Endpoint mappings supported by consumer through uri configuration.
+ * 
+ * @author Richard Kettelerij
+ * 
  */
 public enum EndpointMappingType {
 	ROOT_QNAME("rootqname:"), 
