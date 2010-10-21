@@ -176,7 +176,7 @@ More information on setting up Spring-WS can be found in "Writing Contract-First
 
 h3. Endpoint mapping in routes
 
-With the XML configuration in-place you can now use Camel's DSL to define what web service request are handled by your endpoint, as illustrated below.
+With the XML configuration in-place you can now use Camel's DSL to define what web service request are handled by your endpoint:
 
 The following route will receive all web service requests that have a root element named "GetFoo" within the "http://example.com/" namespace.
 <code>
@@ -202,11 +202,11 @@ from("springws:xpathresult:abc?expression=//foobar&endpointMapping=#endpointMapp
 .convertBodyTo(String.class).to(mock:example)
 </code>
 
-h3. Using existing endpoint mappings
+h3. Alternative configuration, using existing endpoint mappings
 
 The use of the @beanname@ mapping-type is primarily meant for (legacy) situations where you're already using Spring-WS and have endpoint mappings defined in a Spring XML file. The @beanname@ mapping-type allows you to wire your Camel route into an existing endpoint mapping. When you're starting from scratch it's recommended to define your endpoint mappings as Camel URI's (as illustrated above with @endpointMapping@) since it requires less configuration and is more expressive. Alternatively you could use vanilla Spring-WS with the help of annotations. 
 
-For every endpoint with mapping-type @beanname@ one bean of type @org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher@ with a corresponding name is required in the Registry/ApplicationContext. This bean acts as a bridge between the Camel endpoint and an existing "endpoint mapping":http://static.springsource.org/spring-ws/sites/1.5/reference/html/server.html#server-endpoint-mapping. 
+For every endpoint with mapping-type @beanname@ one bean of type @org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher@ with a corresponding name is required in the Registry/ApplicationContext. This bean acts as a bridge between the Camel endpoint and an existing "endpoint mapping":http://static.springsource.org/spring-ws/sites/1.5/reference/html/server.html#server-endpoint-mapping. Example of a route using @beanname@:
 
 <pre>
 <camelContext xmlns="http://camel.apache.org/schema/spring">
