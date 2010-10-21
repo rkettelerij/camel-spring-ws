@@ -132,7 +132,7 @@ public class SpringWebserviceComponent extends DefaultComponent {
 		// Obtain CamelEndpointDispatcher with the given name from registry
 		CamelEndpointDispatcher endpoint = getCamelContext().getRegistry().lookup(lookupKey, CamelEndpointDispatcher.class);
 		if (endpoint == null) {
-			throw new RuntimeCamelException("No CamelEndpointDispatcher found in Spring ApplicationContext with the given name");
+			throw new RuntimeCamelException("No CamelEndpointDispatcher found in Spring ApplicationContext with name " + lookupKey);
 		}
 		configuration.setEndpointDispatcher(endpoint);
 	}
