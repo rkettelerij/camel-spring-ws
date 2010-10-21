@@ -22,5 +22,4 @@ public final class SpringWebserviceConstants {
 	public static final String SPRING_WS_ENDPOINT_URI = "CamelSpringWebserviceEndpointUri";
 	public static final String SPRING_WS_SOAP_ACTION = "CamelSpringWebserviceSoapAction";
 	public static final String SPRING_WS_ADDRESSING_ACTION = "CamelSpringWebserviceAddressingAction";
-	public static final String SPRING_WS_CUSTOM_SOAP_HEADERS = "CamelSpringWebserviceCustomSoapHeaders";
 }
