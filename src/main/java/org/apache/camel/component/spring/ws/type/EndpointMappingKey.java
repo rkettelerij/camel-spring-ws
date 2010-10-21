@@ -22,7 +22,7 @@ public class EndpointMappingKey {
 	private EndpointMappingType type;
 	private String lookupKey;
 	
-	/** expression in case type is 'xpath' */
+	/* expression in case type is 'xpath' */
 	private XPathExpression expression;
 
 	public EndpointMappingKey(EndpointMappingType type, String lookupKey,
