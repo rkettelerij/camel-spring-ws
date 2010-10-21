@@ -29,6 +29,9 @@ import org.apache.camel.Converter;
  * 
  * Note that conversion options are limited by Spring's {@link StringSource} since it's the most 
  * simple one. It has just one constructor that accepts a String as input.
+ * 
+ * @author Richard Kettelerij
+ * 
  */
 @Converter
 public class StringSourceConverter {
