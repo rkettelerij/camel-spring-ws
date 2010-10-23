@@ -30,7 +30,7 @@ public class SpringWebserviceMessage extends DefaultMessage {
     @Override
     protected Object createBody() {
         if (webServiceMessage != null) {
-            webServiceMessage.getPayloadSource();
+            return webServiceMessage.getPayloadSource();
         }
         return null;
     }

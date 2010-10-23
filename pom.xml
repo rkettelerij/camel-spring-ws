@@ -17,7 +17,7 @@
 	<groupId>org.apache.camel</groupId>
 	<artifactId>camel-spring-ws</artifactId>
 	<name>Camel :: Spring Web Services</name>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0</version>
 	<description>Camel support for Spring Web Services</description>
 
 	<properties>
