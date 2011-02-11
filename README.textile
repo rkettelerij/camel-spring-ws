@@ -1,4 +1,3 @@
-h1. Documentation moved!
+h1. Moved to Apache!
 
-I've moved the documentation of the *springws:* component to Apache: "http://camel.apache.org/spring-web-services":http://camel.apache.org/spring-web-services. (also see "CAMEL-3105":https://issues.apache.org/activemq/browse/CAMEL-3105)
-
+The *springws:* component in now part of Apache Camel. It's available in Camel 2.6 or higher. Checkout "http://camel.apache.org/spring-web-services":http://camel.apache.org/spring-web-services.
